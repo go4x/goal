@@ -62,7 +62,7 @@ func TestHttp_BuilderGet(t *testing.T) {
 	logger := got.Wrap(t)
 	logger.Title("test send http GET method with builder api")
 	logger.Case("GET html from baidu home page.")
-	httpx.NewBuilder("http://www.baidu.com").WhenSuccess(func(resp *http.Response) {
+	httpx.NewBuilder("http://www.baidu.com").Success(func(resp *http.Response) {
 		defer resp.Body.Close()
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -75,12 +75,12 @@ func TestHttp_BuilderGet(t *testing.T) {
 		} else {
 			logger.Pass("should has body")
 		}
-	}).WhenFailed(func(err error) {
+	}).Failed(func(err error) {
 		logger.Fail("should has no error but found: %v", err)
 	}).Get()
 
 	logger.Case("GET html from localhost:1234.")
-	httpx.NewBuilder("http://localhost:1234/html").WhenSuccess(func(resp *http.Response) {
+	httpx.NewBuilder("http://localhost:1234/html").Success(func(resp *http.Response) {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			logger.Fail("response body should be readable but not: %v", err)
@@ -92,14 +92,14 @@ func TestHttp_BuilderGet(t *testing.T) {
 		} else {
 			logger.Pass("should return the correct html")
 		}
-	}).WhenFailed(func(err error) {
+	}).Failed(func(err error) {
 		logger.Fail("should has not error but found: %v", err)
 	}).Get()
 
 	logger.Case("GET json from localhost:1234.")
-	httpx.NewBuilder("http://localhost:1234/json").WhenSuccess(func(resp *http.Response) {
+	httpx.NewBuilder("http://localhost:1234/json").Success(func(resp *http.Response) {
 		jsonToUser(resp.Body, logger)
-	}).WhenFailed(func(err error) {
+	}).Failed(func(err error) {
 		logger.Fail("should has not error but found: %v", err)
 	}).Get()
 
@@ -108,11 +108,11 @@ func TestHttp_BuilderGet(t *testing.T) {
 	// }).Get()
 
 	logger.Case("GET unknown url from localhost:1234.")
-	httpx.NewBuilder("http://localhost:1234/unknown").WhenSuccess(func(resp *http.Response) {
+	httpx.NewBuilder("http://localhost:1234/unknown").Success(func(resp *http.Response) {
 		if resp != nil {
 			logger.Fail("should be nil response but not")
 		}
-	}).WhenFailed(func(err error) {
+	}).Failed(func(err error) {
 		if err == nil {
 			logger.Fail("expect occur an error but no one")
 		} else {
@@ -303,7 +303,7 @@ func TestSimplePost(t *testing.T) {
 
 	logger.Case("simplest post html")
 	var s string
-	httpx.NewBuilder("http://localhost:1234/html").WhenSuccess(func(resp *http.Response) {
+	httpx.NewBuilder("http://localhost:1234/html").Success(func(resp *http.Response) {
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			logger.Fail("should can read response data, but got error: %v", err)
@@ -316,14 +316,14 @@ func TestSimplePost(t *testing.T) {
 			logger.Pass("should has body")
 		}
 		s = string(bytes)
-	}).WhenFailed(func(err error) {
+	}).Failed(func(err error) {
 		logger.Require(err == nil, "request should be successful")
 	}).Post()
 	logger.Require(html == s, "post result with string should be correct")
 
 	logger.Case("simplest post json")
 	var js string
-	httpx.NewBuilder("http://localhost:1234/json").WhenSuccess(func(resp *http.Response) {
+	httpx.NewBuilder("http://localhost:1234/json").Success(func(resp *http.Response) {
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			logger.Fail("should can read response data, but got error: %v", err)
@@ -336,7 +336,7 @@ func TestSimplePost(t *testing.T) {
 			logger.Pass("should has body")
 		}
 		js = string(bytes)
-	}).WhenFailed(func(err error) {
+	}).Failed(func(err error) {
 		logger.Require(err == nil, "request should be successful")
 	}).Post()
 	logger.Require(js == jsonstr, "post result with string should be correct")

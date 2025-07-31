@@ -1,6 +1,8 @@
 package httpx
 
-// http 支持的 ContentType 类型定义
+// ContentType is a string type for http content type
+type ContentType string
+
 const (
 	ContentTypeAll                        ContentType = "*/*"
 	ContentTypeApplicationAtomXml         ContentType = "application/atom+xml"

@@ -20,13 +20,13 @@ func ExampleNewBuilder() {
 
 	var ret string
 	// build a get request
-	httpx.NewBuilder("http://localhost:1234/html").WhenSuccess(func(resp *http.Response) { // request success
+	httpx.NewBuilder("http://localhost:1234/html").Success(func(resp *http.Response) { // request success
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatalf("response body should be readable but not: %v", err)
 		}
 		ret = string(body)
-	}).WhenFailed(func(err error) { // request failed
+	}).Failed(func(err error) { // request failed
 		panic(err)
 	}).Get() // request completed, clear resources
 
