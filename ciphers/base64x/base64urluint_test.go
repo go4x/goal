@@ -114,3 +114,64 @@ func TestEncLongString(t *testing.T) {
 		}
 	}
 }
+
+func TestBase64UrlUint_EncodeDecode(t *testing.T) {
+	type testCase struct {
+		name  string
+		value string // decimal string for big.Int
+	}
+	tests := []testCase{
+		{
+			name:  "Zero",
+			value: "0",
+		},
+		{
+			name:  "Small number",
+			value: "123456789",
+		},
+		{
+			name:  "Large number",
+			value: "987654321012345678909876543210",
+		},
+		{
+			name:  "Very large number",
+			value: "17074681210596346338238930741604719911471739263388201349161845562864656504969182747504982503280340095360421241540209107445393214665406042841653086840197654417437871915910700267737069351329285696844640299283651360376405207418980525942229586349408618823167696115135581627673750603170073872274583421669922746451810309004616254464214848244623392288415427808688666932715607147074268328966971346040049513796636811220067839144851245646757079953966882044326791197178356185865975824396146836926034001801190192888799824010789817258551225187590168318741899180377721337496032847013690934283071678384120201592932662085385131026613",
+		},
+	}
+
+	lg := got.Wrap(t)
+	for _, tc := range tests {
+		lg.Case(tc.name)
+		t.Run(tc.name, func(t *testing.T) {
+			bi, ok := new(big.Int).SetString(tc.value, 10)
+			if !ok {
+				lg.Fatalf("failed to parse big.Int from value: %s", tc.value)
+			}
+			enc := base64x.Base64UrlUint.Encode(bi)
+			dec, err := base64x.Base64UrlUint.Decode(enc)
+			if err != nil {
+				lg.Fatalf("Decode failed: %v", err)
+			}
+			if dec.String() != tc.value {
+				lg.Errorf("Encode/Decode mismatch: got %s, want %s", dec.String(), tc.value)
+			}
+		})
+	}
+}
+
+func TestBase64UrlUint_Decode_InvalidInput(t *testing.T) {
+	invalidInputs := []string{
+		"",
+		"====",
+		"!!invalid!!",
+		"12345*",
+		"SGVsbG8=", // "Hello" in base64, not a valid uint
+	}
+	lg := got.Wrap(t)
+	for _, input := range invalidInputs {
+		t.Run(input, func(t *testing.T) {
+			_, err := base64x.Base64UrlUint.Decode(input)
+			lg.Require(err != nil, "expected error for input %q, got nil", input)
+		})
+	}
+}

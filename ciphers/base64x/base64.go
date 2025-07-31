@@ -11,10 +11,14 @@ var RawStdEncoding base64raw
 type base64std struct {
 }
 
+// Encode encodes the given byte slice into a base64-encoded string using base64.StdEncoding.
 func (base64std) Encode(b []byte) string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
+// Decode decodes a base64-encoded string using base64.StdEncoding.
+// If the optional 'strict' parameter is true, it uses strict decoding mode (rejects invalid characters).
+// Returns the decoded bytes and an error if decoding fails.
 func (base64std) Decode(str string, strict ...bool) ([]byte, error) {
 	if len(strict) > 0 && strict[0] {
 		return base64.StdEncoding.Strict().DecodeString(str)
@@ -26,10 +30,14 @@ func (base64std) Decode(str string, strict ...bool) ([]byte, error) {
 type base64raw struct {
 }
 
+// Encode encodes the given byte slice into a base64-encoded string using base64.RawStdEncoding.
 func (base64raw) Encode(b []byte) string {
 	return base64.RawStdEncoding.EncodeToString(b)
 }
 
+// Decode decodes a base64-encoded string using base64.RawStdEncoding.
+// If the optional 'strict' parameter is true, it uses strict decoding mode (rejects invalid characters).
+// Returns the decoded bytes and an error if decoding fails.
 func (base64raw) Decode(str string, strict ...bool) ([]byte, error) {
 	if len(strict) > 0 && strict[0] {
 		return base64.RawStdEncoding.Strict().DecodeString(str)

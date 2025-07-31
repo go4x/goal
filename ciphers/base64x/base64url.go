@@ -11,10 +11,14 @@ var RawURLEncoding base64RawUrl
 type base64Url struct {
 }
 
+// Encode encodes the given byte slice into a base64url-encoded string using base64.URLEncoding.
 func (base64Url) Encode(b []byte) string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
+// Decode decodes a base64url-encoded string using base64.URLEncoding.
+// If the optional 'strict' parameter is true, it uses strict decoding mode (rejects invalid characters).
+// Returns the decoded bytes and an error if decoding fails.
 func (base64Url) Decode(str string, strict ...bool) ([]byte, error) {
 	if len(strict) > 0 && strict[0] {
 		return base64.URLEncoding.Strict().DecodeString(str)
