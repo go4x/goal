@@ -15,7 +15,7 @@ const (
 )
 
 func Test_Base64UrlEncode(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "Base64UrlEncode")
 	lg.Case("testing base64s.URLEncoding.Encode")
 	enc := base64x.RawURLEncoding.Encode([]byte(plaintext))
 	fmt.Println(enc)
@@ -23,7 +23,7 @@ func Test_Base64UrlEncode(t *testing.T) {
 }
 
 func Test_Base64UrlDecode(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "Base64UrlDecode")
 	lg.Case("testing base64s.URLEncoding.Decode")
 	dec, err := base64x.RawURLEncoding.Decode(base64enc, true)
 	lg.Require(err == nil, "requires no error")

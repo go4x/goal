@@ -8,7 +8,7 @@ import (
 )
 
 func TestExists(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "test Exists")
 
 	lg.Case("give a existing dir")
 	f := ".."
@@ -20,7 +20,7 @@ func TestExists(t *testing.T) {
 }
 
 func TestIsDir(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "test IsDir")
 
 	lg.Case("give a existing dir")
 	f := "../iox"
@@ -32,7 +32,7 @@ func TestIsDir(t *testing.T) {
 }
 
 func TestIsRegularFile(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "test IsRegularFile")
 
 	lg.Case("give a existing dir")
 	f := "../iox/"

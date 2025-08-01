@@ -28,7 +28,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestRetain(t *testing.T) {
-	logger := got.Wrap(t)
+	logger := got.New(t, "Retain")
 
 	ret := slicex.Wrap(testSlice).Retain(func(a int) bool {
 		return a > 5
@@ -50,7 +50,7 @@ func TestRetain(t *testing.T) {
 }
 
 func TestJoin(t *testing.T) {
-	logger := got.Wrap(t)
+	logger := got.New(t, "Join")
 
 	s := slicex.Wrap(testSlice).Join(",")
 	logger.Require(s == "1,2,3,4,5,6,7,8,9", "%v join result should be %s", testSlice, s)
@@ -65,7 +65,7 @@ func TestJoin(t *testing.T) {
 func TestUnion(t *testing.T) {
 	var before = testSlice
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "Union")
 	sl := []int{1, 2, 3, 4, 5, 6, 10, 11}
 	want := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 	ret := slicex.Wrap(testSlice).Union(sl).Raw()
@@ -76,7 +76,7 @@ func TestUnion(t *testing.T) {
 func TestIntersect(t *testing.T) {
 	var before = testSlice
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "Intersect")
 	sl := []int{1, 2, 3, 10, 11}
 	want := []int{1, 2, 3}
 	ret := slicex.Wrap(testSlice).Intersect(sl).Raw()
@@ -87,7 +87,7 @@ func TestIntersect(t *testing.T) {
 func TestRemove(t *testing.T) {
 	var before = testSlice
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "Remove")
 	sl := []int{1, 2, 3, 10, 11}
 	want := []int{4, 5, 6, 7, 8, 9}
 	ret := slicex.Wrap(testSlice).Remove(sl).Raw()
@@ -98,7 +98,7 @@ func TestRemove(t *testing.T) {
 func TestDiff(t *testing.T) {
 	var before = testSlice
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "Diff")
 	sl := []int{1, 2, 3, 10, 11}
 	want := []int{4, 5, 6, 7, 8, 9, 10, 11}
 	ret := slicex.Wrap(testSlice).Diff(sl).Raw()
@@ -109,7 +109,7 @@ func TestDiff(t *testing.T) {
 func TestDelete(t *testing.T) {
 	raw := testSlice
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "Delete")
 	want := []int{4, 5, 6, 7, 8, 9}
 	var ret = slicex.Wrap(testSlice).Delete(1, 2, 3).Raw()
 	logger.Require(reflect.DeepEqual(testSlice, raw), "raw slice should not be changed")
@@ -122,7 +122,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestRemoveDuplicate(t *testing.T) {
-	logger := got.Wrap(t)
+	logger := got.New(t, "RemoveDuplicate")
 
 	raw := []int{1, 1, 2, 2, 3, 4, 5, 5, 6, 7, 7}
 	ret := slicex.Wrap(raw).RemoveDuplicate().Raw()
@@ -132,7 +132,7 @@ func TestRemoveDuplicate(t *testing.T) {
 }
 
 func TestChainInvoke(t *testing.T) {
-	logger := got.Wrap(t)
+	logger := got.New(t, "ChainInvoke")
 
 	want := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	// not use Raw()

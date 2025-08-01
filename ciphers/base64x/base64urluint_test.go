@@ -29,7 +29,7 @@ func TestEncode(t *testing.T) {
 		},
 	}
 
-	lg := got.Wrap(t)
+	lg := got.New(t, "Base64UrlUintEncode")
 	lg.Case("Test base64s.Base64UrlUint.Encode")
 	for _, test := range tt {
 		got := base64x.Base64UrlUint.Encode(test.input())
@@ -73,7 +73,7 @@ func Test_Base64UrlUintDecode(t *testing.T) {
 		},
 	}
 
-	lg := got.Wrap(t)
+	lg := got.New(t, "Base64UrlUintDecode")
 	lg.Case("Test base64s.Base64UrlUint.Decode")
 
 	for _, test := range tt {
@@ -139,7 +139,7 @@ func TestBase64UrlUint_EncodeDecode(t *testing.T) {
 		},
 	}
 
-	lg := got.Wrap(t)
+	lg := got.New(t, "Base64UrlUintEncodeDecode")
 	for _, tc := range tests {
 		lg.Case(tc.name)
 		t.Run(tc.name, func(t *testing.T) {
@@ -167,7 +167,7 @@ func TestBase64UrlUint_Decode_InvalidInput(t *testing.T) {
 		"12345*",
 		"SGVsbG8=", // "Hello" in base64, not a valid uint
 	}
-	lg := got.Wrap(t)
+	lg := got.New(t, "Base64UrlUintDecodeInvalidInput")
 	for _, input := range invalidInputs {
 		t.Run(input, func(t *testing.T) {
 			_, err := base64x.Base64UrlUint.Decode(input)

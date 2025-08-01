@@ -17,7 +17,7 @@ func TestRgb(t *testing.T) {
 		"0000FF": {0, 0, 255},
 		"C8C8C8": {200, 200, 200},
 	}
-	logger := got.Wrap(t)
+	logger := got.New(t, "Rgb")
 
 	logger.Case("test rgb.Hex()")
 	for k, v := range cases {

@@ -59,8 +59,7 @@ func startServer() *http.Server {
 func TestHttp_BuilderGet(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
-	logger.Title("test send http GET method with builder api")
+	logger := got.New(t, "test send http GET method with builder api")
 	logger.Case("GET html from baidu home page.")
 	httpx.NewBuilder("http://www.baidu.com").Success(func(resp *http.Response) {
 		defer resp.Body.Close()
@@ -121,7 +120,7 @@ func TestHttp_BuilderGet(t *testing.T) {
 	}).Get()
 }
 
-func jsonToUser(r io.Reader, logger *got.Logger) {
+func jsonToUser(r io.Reader, logger *got.R) {
 	body, err := io.ReadAll(r)
 	if err != nil {
 		logger.Fail("response body should be readable but not: %v", err)
@@ -150,7 +149,7 @@ func jsonToUser(r io.Reader, logger *got.Logger) {
 func TestHttp_GetString(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "test GetString method")
 	logger.Case("using GetString method to get html from localhost:1234")
 	s, err := httpx.GetString("http://localhost:1234/html")
 	if err != nil {
@@ -168,8 +167,7 @@ func TestHttp_GetString(t *testing.T) {
 func TestHttp_MustGetString(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
-	logger.Title("test MustGetString method")
+	logger := got.New(t, "test MustGetString method")
 
 	logger.Case("positive case: get json from localhost:1234")
 	s := httpx.MustGetString("http://localhost:1234/json")
@@ -188,7 +186,7 @@ func TestHttp_MustGetString(t *testing.T) {
 func TestHttp_MustGet(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "test MustGet method")
 	logger.Case("using MustGet method to get json string from localhost:1234")
 	httpx.MustGet("http://localhost:1234/json", func(resp *http.Response) {
 		jsonToUser(resp.Body, logger)
@@ -208,7 +206,7 @@ func TestHttp_MustGet(t *testing.T) {
 func TestHttp_Get(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
+	logger := got.New(t, "test Get method")
 	logger.Case("using Get method to get json string from localhost:1234")
 	httpx.Get("http://localhost:1234/json", func(resp *http.Response) {
 		jsonToUser(resp.Body, logger)
@@ -230,8 +228,7 @@ func TestHttp_Get(t *testing.T) {
 }
 
 func TestHttp_GetBytes(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("using GetBytes or MustGetBytes method to get bytes")
+	logger := got.New(t, "test GetBytes or MustGetBytes method")
 	logger.Case("request an image from baidu")
 	url := "https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png"
 	bs, err := httpx.GetBytes(url)
@@ -254,8 +251,7 @@ func TestHttp_GetJsonObject(t *testing.T) {
 		Height float32 `json:"height"`
 	}
 
-	logger := got.Wrap(t)
-	logger.Title("using GetJsonObject or MustGetJsonObject method to get object from json response")
+	logger := got.New(t, "test GetJsonObject or MustGetJsonObject method")
 
 	logger.Case("GetJsonObject: request json from localhost:1234 and unmarshal it to user struct")
 	u, err := httpx.GetJson("http://localhost:1234/json", &user{})
@@ -280,8 +276,7 @@ func TestHttp_GetResp(t *testing.T) {
 		Height float32 `json:"height"`
 	}
 
-	logger := got.Wrap(t)
-	logger.Title("using GetJsonObject or MustGetJsonObject method to get object from json response")
+	logger := got.New(t, "test GetJsonObject or MustGetJsonObject method")
 
 	logger.Case("GetResp: request json from localhost:1234 and unmarshal it to user struct")
 	r := httpx.GetResp("http://localhost:1234/json")
@@ -298,8 +293,7 @@ func TestHttp_GetResp(t *testing.T) {
 func TestSimplePost(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
-	logger.Title("test basic post request")
+	logger := got.New(t, "test basic post request")
 
 	logger.Case("simplest post html")
 	var s string
@@ -345,8 +339,7 @@ func TestSimplePost(t *testing.T) {
 func TestPostForm(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
-	logger.Title("test request")
+	logger := got.New(t, "test request")
 
 	logger.Case("test post html")
 	url := "http://localhost:1234/html"
@@ -358,8 +351,7 @@ func TestPostForm(t *testing.T) {
 func TestPostJson(t *testing.T) {
 	startServer()
 
-	logger := got.Wrap(t)
-	logger.Title("test request")
+	logger := got.New(t, "test request")
 
 	logger.Case("test post json")
 	url := "http://localhost:1234/json"

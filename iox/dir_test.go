@@ -10,7 +10,7 @@ import (
 )
 
 func TestExistsDir(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "test ExistsDir")
 
 	lg.Case("give a existing dir")
 	f := "/Users/home/goal/"

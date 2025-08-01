@@ -16,7 +16,7 @@ var sw1 = "aGVsbG8sIOi/meaYr+S4reaWhyE="
 var rw1 = "aGVsbG8sIOi/meaYr+S4reaWhyE"
 
 func TestBase(t *testing.T) {
-	tl := got.Wrap(t)
+	tl := got.New(t, "Base64")
 
 	tl.Case("StdEncoding.Encode")
 	gotStd := base64x.StdEncoding.Encode([]byte(s))

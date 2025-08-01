@@ -8,7 +8,7 @@ import (
 )
 
 func TestExistsFile(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "test ExistsFile")
 
 	lg.Case("give an existing file")
 	f := "./file_test.go"

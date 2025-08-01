@@ -8,8 +8,7 @@ import (
 )
 
 func TestRequire(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.Require method")
+	logger := got.New(t, "test assert.Require method")
 
 	logger.Case("give a true condition, should not panic")
 	func() {
@@ -39,8 +38,7 @@ func TestRequire(t *testing.T) {
 	}()
 }
 func TestTrue(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.True method")
+	logger := got.New(t, "test assert.True method")
 
 	logger.Case("give true, should not panic")
 	func() {
@@ -68,8 +66,7 @@ func TestTrue(t *testing.T) {
 }
 
 func TestNil(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.Nil method")
+	logger := got.New(t, "test assert.Nil method")
 
 	logger.Case("give nil, should not panic")
 	func() {
@@ -97,8 +94,7 @@ func TestNil(t *testing.T) {
 }
 
 func TestNoneNil(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.NoneNil method")
+	logger := got.New(t, "test assert.NoneNil method")
 
 	logger.Case("give not nil, should not panic")
 	func() {
@@ -126,8 +122,7 @@ func TestNoneNil(t *testing.T) {
 }
 
 func TestBlank(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.Blank method")
+	logger := got.New(t, "test assert.Blank method")
 
 	logger.Case("give blank string, should not panic")
 	func() {
@@ -156,8 +151,7 @@ func TestBlank(t *testing.T) {
 	}()
 }
 func TestNotBlank(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.NotBlank method")
+	logger := got.New(t, "test assert.NotBlank method")
 
 	logger.Case("give not blank string, should not panic")
 	func() {
@@ -187,8 +181,7 @@ func TestNotBlank(t *testing.T) {
 }
 
 func TestHasElems(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.HasElems method")
+	logger := got.New(t, "test assert.HasElems method")
 
 	logger.Case("give non-empty slice, should not panic")
 	func() {
@@ -234,8 +227,7 @@ func TestHasElems(t *testing.T) {
 }
 
 func TestEquals(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.Equals method")
+	logger := got.New(t, "test assert.Equals method")
 
 	logger.Case("give equal values, should not panic")
 	func() {
@@ -264,8 +256,7 @@ func TestEquals(t *testing.T) {
 }
 
 func TestDeepEquals(t *testing.T) {
-	logger := got.Wrap(t)
-	logger.Title("test assert.DeepEquals method")
+	logger := got.New(t, "test assert.DeepEquals method")
 
 	logger.Case("give deeply equal values, should not panic")
 	func() {

@@ -8,7 +8,7 @@ import (
 	"github.com/gophero/goal/errorx"
 )
 
-// AES 加密算法
+// AES encrypt and decrypt object
 //
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
 var AES = &aeser{}
@@ -16,17 +16,18 @@ var AES = &aeser{}
 type aeser struct {
 }
 
-type AesMode int
+// AESMode is the mode of the AES encryption and decryption
+type AESMode int
 
 const (
-	// ECB 加密模式：https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#ECB
-	// ECB 模式存在安全性问题，不建议使用，详见：https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption/20946#20946
-	ECB AesMode = iota
-	// CBC 加密模式：https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC
+	// ECB mode: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#ECB
+	// ECB mode has security issues, it is not recommended to use, see: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption/20946#20946
+	ECB AESMode = iota
+	// CBC mode: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC
 	CBC
 )
 
-func (a *aeser) Encrypt(rawBytes []byte, key []byte, mode AesMode, iv []byte) ([]byte, error) {
+func (a *aeser) Encrypt(rawBytes []byte, key []byte, mode AESMode, iv []byte) ([]byte, error) {
 	switch mode {
 	case ECB:
 		return aesEncryptECB(rawBytes, key)
@@ -37,7 +38,7 @@ func (a *aeser) Encrypt(rawBytes []byte, key []byte, mode AesMode, iv []byte) ([
 	}
 }
 
-func (a *aeser) Decrypt(cipherBytes []byte, key []byte, mode AesMode, iv []byte) ([]byte, error) {
+func (a *aeser) Decrypt(cipherBytes []byte, key []byte, mode AESMode, iv []byte) ([]byte, error) {
 	switch mode {
 	case ECB:
 		return aesDecryptECB(cipherBytes, key)
@@ -48,43 +49,43 @@ func (a *aeser) Decrypt(cipherBytes []byte, key []byte, mode AesMode, iv []byte)
 	}
 }
 
-// pkcs7Padding pkcs7 填充，详见：https://en.wikipedia.org/wiki/Padding_(cryptography)
+// pkcs7Padding pkcs7 padding, see: https://en.wikipedia.org/wiki/Padding_(cryptography)
 func pkcs7Padding(cipherText []byte, blockSize int) []byte {
-	// 判断缺少几位长度，最少1，最多 blockSize
+	// calculate the padding length, the minimum is 1, the maximum is blockSize
 	padding := blockSize - len(cipherText)%blockSize
-	// 将填充的数量 padding 作为每字节填充内容（反向填充时可以直接获取），并复制 padding 个
+	// copy padding bytes to the end of the cipherText
 	padText := bytes.Repeat([]byte{byte(padding)}, padding)
-	// 填充完成，拼接字节
+	// append the padding bytes to the end of the cipherText
 	return append(cipherText, padText...)
 }
 
-// pkcs7UnPadding pkcs7 取消填充
+// pkcs7UnPadding pkcs7 unpadding
 func pkcs7UnPadding(cipherText []byte) []byte {
 	length := len(cipherText)
-	// 获取填充的个数，最后一字节的整数代表了已经填充的字节数
+	// get the padding length, the last byte of the cipherText represents the number of padding bytes
 	unPadding := int(cipherText[length-1])
-	// 去掉填充的字节
+	// remove the padding bytes
 	return cipherText[:(length - unPadding)]
 }
 
 func aesEncryptECB(rawText []byte, key []byte) ([]byte, error) {
-	// 创建 cipher，如果 key 长度不是16、24、32字节，则会 panic
+	// create cipher, if the key length is not 16, 24, or 32 bytes, it will panic
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
-	// AES分组后每组长度为16字节，128位，所以 blockSize = 16 字节
+	// AES block size is 16 bytes, 128 bits, so blockSize = 16 bytes
 	bs := block.BlockSize()
-	// 使用 pkcs#7 加密模式进行填充
+	// use pkcs#7 padding mode
 	rawText = pkcs7Padding(rawText, bs)
-	// 填充完成后，被加密字节数组的长度必须块大小的倍数，即16的倍数
+	// the length of the encrypted bytes array must be a multiple of the block size, that is, 16
 	if len(rawText)%bs != 0 {
 		panic("block size padding failed")
 	}
 
 	out := make([]byte, len(rawText))
 	dst := out
-	// 对原文依次分组加密
+	// encrypt the raw text by blocks
 	for len(rawText) > 0 {
 		block.Encrypt(dst, rawText[:bs])
 		rawText = rawText[bs:]
@@ -105,7 +106,7 @@ func aesDecryptECB(cipherText []byte, key []byte) ([]byte, error) {
 
 	out := make([]byte, len(cipherText))
 	dst := out
-	// 解密
+	// decrypt the cipher text by blocks
 	for len(cipherText) > 0 {
 		block.Decrypt(dst, cipherText[:bs])
 		cipherText = cipherText[bs:]
@@ -122,8 +123,8 @@ func aesEncryptCBC(rawBytes []byte, key []byte, iv []byte) ([]byte, error) {
 	}
 	blockSize := block.BlockSize()
 	rawBytes = pkcs7Padding(rawBytes, blockSize)
-	// 创建 CBC 加密器，初始向量 iv 长度必须等于块长度 blockSize
-	blockMode := cipher.NewCBCEncrypter(block, iv) // 初始向量的长度必须等于块block的长度16字节
+	// create CBC encryptor, the length of the initial vector iv must be equal to the block size
+	blockMode := cipher.NewCBCEncrypter(block, iv) // the length of the initial vector iv must be equal to the block size
 	dst := make([]byte, len(rawBytes))
 	blockMode.CryptBlocks(dst, rawBytes)
 	return dst, nil
@@ -134,7 +135,7 @@ func aesDecryptCBC(cipherBytes []byte, key []byte, iv []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	blockMode := cipher.NewCBCDecrypter(block, iv) // 初始向量的长度必须等于块block的长度16字节
+	blockMode := cipher.NewCBCDecrypter(block, iv) // the length of the initial vector iv must be equal to the block size
 	rawBytes := make([]byte, len(cipherBytes))
 	blockMode.CryptBlocks(rawBytes, cipherBytes)
 	rawBytes = pkcs7UnPadding(rawBytes)

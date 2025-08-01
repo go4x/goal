@@ -9,7 +9,7 @@ import (
 )
 
 func TestInt(t *testing.T) {
-	tr := got.Wrap(t)
+	tr := got.New(t, "test Int")
 	tr.Case("give 1, should get 0")
 	r := random.Int(1)
 	tr.Require(r == 0, "result should be 0")
@@ -53,7 +53,7 @@ func FuzzInt(f *testing.F) {
 }
 
 func TestBetween(t *testing.T) {
-	tr := got.Wrap(t)
+	tr := got.New(t, "test Between")
 	tr.Case("give 0,0, get 0")
 	r := random.Between(0, 0)
 	tr.Require(r == 0, "should get 0")

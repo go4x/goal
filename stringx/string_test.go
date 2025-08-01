@@ -60,7 +60,7 @@ func TestCamelCaseToUnderscore(t *testing.T) {
 		{"abcDefGh😄", "abc_def_gh😄"},
 	}
 
-	tl := got.Wrap(t)
+	tl := got.New(t, "test CamelCaseToUnderscore")
 	tl.Case("camelcase to underscore")
 
 	for _, c := range cs {
@@ -78,7 +78,7 @@ func TestUnderscoreToCamelCase(t *testing.T) {
 		{"AbcDefGh中文", "abc_def_gh中文"},
 	}
 
-	tl := got.Wrap(t)
+	tl := got.New(t, "test UnderscoreToCamelCase")
 	tl.Case("camelcase to underscore")
 
 	for _, c := range cs {

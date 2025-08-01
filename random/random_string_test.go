@@ -9,7 +9,7 @@ import (
 )
 
 func TestRandomAlphabetic(t *testing.T) {
-	tl := got.Wrap(t)
+	tl := got.New(t, "test Alphabetic")
 	tl.Case("loop 10 times to generate random string")
 	for i := 0; i < 10; i++ {
 		n := rand.Intn(32) + 1
@@ -19,7 +19,7 @@ func TestRandomAlphabetic(t *testing.T) {
 }
 
 func TestRandomNumber(t *testing.T) {
-	tl := got.Wrap(t)
+	tl := got.New(t, "test Numeric")
 	tl.Case("loop 10 times to generate random number as string")
 	for i := 0; i < 10; i++ {
 		n := rand.Intn(32) + 1
@@ -29,7 +29,7 @@ func TestRandomNumber(t *testing.T) {
 }
 
 func TestRandomAlphanumeric(t *testing.T) {
-	tl := got.Wrap(t)
+	tl := got.New(t, "test Alphanumeric")
 	tl.Case("loop 10 times to generate random Alphanumeric")
 	for i := 0; i < 10; i++ {
 		n := rand.Intn(32) + 1
@@ -39,7 +39,7 @@ func TestRandomAlphanumeric(t *testing.T) {
 }
 
 func TestRandomHex(t *testing.T) {
-	tl := got.Wrap(t)
+	tl := got.New(t, "test Hex")
 	tl.Case("loop 10 times to generate random hex string")
 	for i := 0; i < 10; i++ {
 		n := rand.Intn(32) + 1

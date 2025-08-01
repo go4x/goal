@@ -8,7 +8,7 @@ import (
 )
 
 func TestMap(t *testing.T) {
-	logger := got.Wrap(t)
+	logger := got.New(t, "Map")
 
 	intMap := mapx.New[string, int]()
 	intMap.Put("a", 1).Put("b", 2).Put("c", 3)

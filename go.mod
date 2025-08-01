@@ -4,7 +4,6 @@ go 1.24.0
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/gophero/got v0.0.0-20250729084442-21d048670508
 	github.com/gophero/logx v0.0.0-20250729094605-7c690516c1f9
 	github.com/sony/sonyflake v1.3.0
 	github.com/stretchr/testify v1.10.0
@@ -14,6 +13,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gophero/got v0.0.0-20250731103304-3a7a1b503471 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible // indirect
 	github.com/lestrrat-go/strftime v1.1.1 // indirect

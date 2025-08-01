@@ -11,7 +11,7 @@ import (
 )
 
 func TestPathExists(t *testing.T) {
-	lg := got.Wrap(t)
+	lg := got.New(t, "test PathExists")
 
 	lg.Case("give an exists path")
 	path := "../goal"
