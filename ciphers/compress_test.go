@@ -116,7 +116,7 @@ func TestC_Random(t *testing.T) {
 	for i := 0; i < 1000000; i++ {
 		n := random.Int(math.MaxInt64)
 		s := C(uint(n))
-		g.Logf("C(%d) = %q", n, s)
+		// g.Logf("C(%d) = %q", n, s)
 		if _, ok := m[s]; ok {
 			g.Require(m[s] == n, "C(%d) = %q; want %q", n, s, m[s])
 		} else {
