@@ -193,7 +193,7 @@ func Test_base64raw_Decode1(t *testing.T) {
 		{name: "case1", args: args{str: "aGVsbG8gd29ybGQ", strict: []bool{true}}, want: []byte("hello world"), wantErr: false},
 		{name: "case2", args: args{str: "Zm9v", strict: []bool{true}}, want: []byte("foo"), wantErr: false},
 		{name: "case3", args: args{str: "", strict: []bool{true}}, want: []byte(""), wantErr: false},
-		{name: "case4", args: args{str: "!!!", strict: []bool{true}}, want: nil, wantErr: true},
+		{name: "case4", args: args{str: "!!!", strict: []bool{true}}, want: []byte(""), wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

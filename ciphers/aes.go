@@ -60,12 +60,29 @@ func pkcs7Padding(cipherText []byte, blockSize int) []byte {
 }
 
 // pkcs7UnPadding pkcs7 unpadding
-func pkcs7UnPadding(cipherText []byte) []byte {
+func pkcs7UnPadding(cipherText []byte) ([]byte, error) {
 	length := len(cipherText)
+	if length == 0 {
+		return nil, errorx.New("empty ciphertext")
+	}
+
 	// get the padding length, the last byte of the cipherText represents the number of padding bytes
 	unPadding := int(cipherText[length-1])
+
+	// validate padding
+	if unPadding == 0 || unPadding > length {
+		return nil, errorx.New("invalid padding")
+	}
+
+	// check if all padding bytes are correct
+	for i := length - unPadding; i < length; i++ {
+		if cipherText[i] != byte(unPadding) {
+			return nil, errorx.New("invalid padding")
+		}
+	}
+
 	// remove the padding bytes
-	return cipherText[:(length - unPadding)]
+	return cipherText[:(length - unPadding)], nil
 }
 
 func aesEncryptECB(rawText []byte, key []byte) ([]byte, error) {
@@ -80,7 +97,7 @@ func aesEncryptECB(rawText []byte, key []byte) ([]byte, error) {
 	rawText = pkcs7Padding(rawText, bs)
 	// the length of the encrypted bytes array must be a multiple of the block size, that is, 16
 	if len(rawText)%bs != 0 {
-		panic("block size padding failed")
+		return nil, errorx.New("block size padding failed")
 	}
 
 	out := make([]byte, len(rawText))
@@ -101,7 +118,7 @@ func aesDecryptECB(cipherText []byte, key []byte) ([]byte, error) {
 	}
 	bs := block.BlockSize()
 	if len(cipherText)%bs != 0 {
-		panic("illegal ciphertext length")
+		return nil, errorx.New("illegal ciphertext length")
 	}
 
 	out := make([]byte, len(cipherText))
@@ -112,7 +129,10 @@ func aesDecryptECB(cipherText []byte, key []byte) ([]byte, error) {
 		cipherText = cipherText[bs:]
 		dst = dst[bs:]
 	}
-	out = pkcs7UnPadding(out)
+	out, err = pkcs7UnPadding(out)
+	if err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
@@ -138,6 +158,9 @@ func aesDecryptCBC(cipherBytes []byte, key []byte, iv []byte) ([]byte, error) {
 	blockMode := cipher.NewCBCDecrypter(block, iv) // the length of the initial vector iv must be equal to the block size
 	rawBytes := make([]byte, len(cipherBytes))
 	blockMode.CryptBlocks(rawBytes, cipherBytes)
-	rawBytes = pkcs7UnPadding(rawBytes)
+	rawBytes, err = pkcs7UnPadding(rawBytes)
+	if err != nil {
+		return nil, err
+	}
 	return rawBytes, nil
 }

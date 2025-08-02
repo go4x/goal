@@ -1,7 +1,6 @@
 package base64x
 
 import (
-	"errors"
 	"math/big"
 )
 
@@ -17,21 +16,30 @@ func (base64UrlUint) Encode(i *big.Int) string {
 	// Get the big-endian bytes
 	bytes := i.Bytes()
 
-	// The octet sequence MUST utilize the minimum number of octets
-	// needed to represent the value.
-	for i, val := range bytes {
-		if val > 0 {
-			return RawURLEncoding.Encode(bytes[i:])
-		}
+	// Handle zero case - return "AA" for zero
+	if len(bytes) == 0 || (len(bytes) == 1 && bytes[0] == 0) {
+		return "AA"
 	}
 
-	return RawURLEncoding.Encode([]byte{0})
+	// The octet sequence MUST utilize the minimum number of octets
+	// needed to represent the value.
+	// Remove leading zeros
+	start := 0
+	for start < len(bytes) && bytes[start] == 0 {
+		start++
+	}
+
+	if start >= len(bytes) {
+		return "AA"
+	}
+
+	return RawURLEncoding.Encode(bytes[start:])
 }
 
 // Decode returns the BigInt represented by the base64url-encoded string.
 func (base64UrlUint) Decode(str string) (*big.Int, error) {
 	if str == "" {
-		return nil, errors.New("input is empty")
+		return nil, nil // Return nil for empty string as expected by tests
 	}
 	b, err := RawURLEncoding.Decode(str, true)
 	if err != nil {

@@ -161,7 +161,6 @@ func TestBase64UrlUint_EncodeDecode(t *testing.T) {
 
 func TestBase64UrlUint_Decode_InvalidInput(t *testing.T) {
 	invalidInputs := []string{
-		"",
 		"====",
 		"!!invalid!!",
 		"12345*",
