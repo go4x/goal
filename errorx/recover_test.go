@@ -7,13 +7,14 @@ import (
 
 	"github.com/gophero/goal/errorx"
 	"github.com/gophero/goal/tests"
+	"github.com/gophero/logx"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRescue(t *testing.T) {
 	var count int32
 	assert.NotPanics(t, func() {
-		defer errorx.Recover(tests.NewLog(), func() {
+		defer errorx.Recover(logx.GetLogger(), func() {
 			atomic.AddInt32(&count, 2)
 		}, func() {
 			atomic.AddInt32(&count, 3)
