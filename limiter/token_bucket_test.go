@@ -11,7 +11,8 @@ import (
 func TestTokenBucketStart(t *testing.T) {
 	t.Run("start", func(t *testing.T) {
 		// max 2 tokens, only consume 1 token every 2 seconds
-		limiter := CreateAndStartTokenBucketLimiter(2, 1, time.Second*2)
+		limiter := NewTokenBucket(2, 1, time.Second*2)
+		limiter.Start()
 		defer limiter.Stop()
 
 		time.Sleep(time.Second * 5)
@@ -20,7 +21,8 @@ func TestTokenBucketStart(t *testing.T) {
 }
 
 func TestTokenBucketTryTake(t *testing.T) {
-	limiter := CreateAndStartTokenBucketLimiter(2, 1, time.Second*2)
+	limiter := NewTokenBucket(2, 1, time.Second*2)
+	limiter.Start()
 	defer limiter.Stop()
 
 	time.Sleep(time.Second * 5)
@@ -48,7 +50,8 @@ func TestTokenBucketTryTake(t *testing.T) {
 }
 
 func TestTokenBucketTake(t *testing.T) {
-	limiter := CreateAndStartTokenBucketLimiter(1, 1, time.Second)
+	limiter := NewTokenBucket(1, 1, time.Second)
+	limiter.Start()
 
 	time.Sleep(time.Second * 3)
 
@@ -68,7 +71,8 @@ func TestTokenBucketTake(t *testing.T) {
 }
 
 func TestTokenBucketTakeWithTimeout(t *testing.T) {
-	limiter := CreateAndStartTokenBucketLimiter(1, 1, time.Second*2)
+	limiter := NewTokenBucket(1, 1, time.Second*2)
+	limiter.Start()
 	defer limiter.Stop()
 
 	start := time.Now()
@@ -86,7 +90,8 @@ func TestTokenBucketTakeWithTimeout(t *testing.T) {
 
 func TestTokenBucketLimiterConcurrent(t *testing.T) {
 	// create a token bucket for testing: capacity 1, 1 token per second
-	limiter := CreateAndStartTokenBucketLimiter(1, 1, time.Second)
+	limiter := NewTokenBucket(1, 1, time.Second)
+	limiter.Start()
 	defer limiter.Stop()
 
 	var wg sync.WaitGroup
@@ -117,11 +122,12 @@ func TestTokenBucketLimiterConcurrent(t *testing.T) {
 }
 
 func TestTokenBucketLimiterStats(t *testing.T) {
-	limiter := CreateAndStartTokenBucketLimiter(1, 1, time.Second)
+	limiter := NewTokenBucket(1, 1, time.Second)
+	limiter.Start()
 	defer limiter.Stop()
 
 	// reset stats
-	limiter.ResetStats()
+	limiter.ResetStat()
 
 	time.Sleep(time.Second * 2)
 
@@ -130,7 +136,7 @@ func TestTokenBucketLimiterStats(t *testing.T) {
 	limiter.TryTake() // failed
 	limiter.TryTake() // failed
 
-	total, blocked, successRate := limiter.GetStats()
+	total, blocked, successRate := limiter.Stat()
 
 	if total != 3 {
 		t.Errorf("expect 3 total requests, actual %d", total)
