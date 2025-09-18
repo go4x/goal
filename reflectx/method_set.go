@@ -1,9 +1,22 @@
-package reflectool
+package reflectx
 
 import (
 	"fmt"
 	"reflect"
 )
+
+func Methods(i interface{}) []string {
+	var t = reflect.TypeOf(i)
+	var elem = t.Elem()
+
+	var nm = elem.NumMethod()
+	var ret []string
+	for i := 0; i < nm; i++ {
+		var m = elem.Method(i)
+		ret = append(ret, m.Name)
+	}
+	return ret
+}
 
 func PrintMethodSet(i interface{}) {
 	var t = reflect.TypeOf(i)
