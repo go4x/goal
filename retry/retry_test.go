@@ -2,53 +2,143 @@ package retry_test
 
 import (
 	"errors"
-	"fmt"
 	"testing"
+	"time"
 
-	"github.com/gophero/goal/random"
 	"github.com/gophero/goal/retry"
-	"github.com/stretchr/testify/assert"
 )
 
-var (
-	succ = func() error { return nil }
-	fail = func() error { return errors.New("make an error") }
-)
+// TestBasicRetry tests the basic retry functionality
+func TestBasicRetry(t *testing.T) {
+	attempts := 0
 
-func TestAlwaysSuccess(t *testing.T) {
-	for i := 0; i < 100; i++ {
-		b, _ := retry.Do(succ, 10)
-		if !b {
-			t.Errorf("test failed")
-			break
+	f := retry.F(func() (bool, error) {
+		attempts++
+		if attempts < 3 {
+			return false, errors.New("temporary error")
 		}
+		return true, nil // Success
+	})
+
+	err := retry.Do(f, retry.Times(5))
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
+	}
+	if attempts != 3 {
+		t.Errorf("Expected 3 attempts, got %d", attempts)
 	}
 }
 
-func TestAlwaysFail(t *testing.T) {
-	for i := 0; i < 100; i++ {
-		b, _ := retry.Do(fail, 0)
-		if b {
-			t.Errorf("test failed")
-			break
+// TestRetryWithCallback tests retry with callback function
+func TestRetryWithCallback(t *testing.T) {
+	attempts := 0
+	callbackCalls := 0
+
+	f := retry.F(func() (bool, error) {
+		attempts++
+		if attempts < 2 {
+			return false, errors.New("temporary error")
 		}
+		return true, nil
+	})
+
+	callback := func(n uint, err error) {
+		callbackCalls++
+		t.Logf("Retry attempt %d failed: %v", n, err)
+	}
+
+	err := retry.Do(f, retry.Times(3), retry.Callback(callback))
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
+	}
+	if attempts != 2 {
+		t.Errorf("Expected 2 attempts, got %d", attempts)
+	}
+	if callbackCalls != 1 {
+		t.Errorf("Expected 1 callback call, got %d", callbackCalls)
 	}
 }
 
-func TestDo(t *testing.T) {
-	var hasErr bool
-	randFunc := func() error {
-		if random.Int(2) == 0 {
-			fmt.Println("retry fail...")
-			hasErr = true
-			return errors.New("make an error")
-		} else {
-			fmt.Println("retry success...")
-			hasErr = false
-			return nil
+// TestRetryWithConstantInterval tests retry with constant interval
+func TestRetryWithConstantInterval(t *testing.T) {
+	attempts := 0
+
+	f := retry.F(func() (bool, error) {
+		attempts++
+		if attempts < 2 {
+			return false, errors.New("temporary error")
 		}
+		return true, nil
+	})
+
+	start := time.Now()
+	err := retry.Do(f,
+		retry.Times(3),
+		retry.Interval(retry.ConstantInterval(100*time.Millisecond)))
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
 	}
-	b, err := retry.Do(randFunc, 4)
-	assert.True(t, b, !hasErr && err == nil)
-	assert.True(t, b, hasErr && err != nil)
+	if attempts != 2 {
+		t.Errorf("Expected 2 attempts, got %d", attempts)
+	}
+	// Should have slept for at least 100ms
+	if elapsed < 100*time.Millisecond {
+		t.Errorf("Expected at least 100ms elapsed, got %v", elapsed)
+	}
+}
+
+// TestRetryMaxAttemptsReached tests when max attempts are reached
+func TestRetryMaxAttemptsReached(t *testing.T) {
+	attempts := 0
+
+	f := retry.F(func() (bool, error) {
+		attempts++
+		return false, errors.New("permanent error")
+	})
+
+	err := retry.Do(f, retry.Times(3))
+	if err == nil {
+		t.Error("Expected error, got nil")
+	}
+	if attempts != 4 { // 1 initial + 3 retries
+		t.Errorf("Expected 4 attempts, got %d", attempts)
+	}
+	if err.Error() != "permanent error" {
+		t.Errorf("Expected 'permanent error', got: %v", err)
+	}
+}
+
+// TestRetryTimesNotSet tests when times is not set
+func TestRetryTimesNotSet(t *testing.T) {
+	f := retry.F(func() (bool, error) {
+		return true, nil
+	})
+
+	err := retry.Do(f)
+	if err == nil {
+		t.Error("Expected error for missing times setting")
+	}
+	if err.Error() != "retry times not be set" {
+		t.Errorf("Expected 'times not be set' error, got: %v", err)
+	}
+}
+
+// TestRetryImmediateSuccess tests when function succeeds immediately
+func TestRetryImmediateSuccess(t *testing.T) {
+	attempts := 0
+
+	f := retry.F(func() (bool, error) {
+		attempts++
+		return true, nil // Immediate success
+	})
+
+	err := retry.Do(f, retry.Times(3))
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
+	}
+	if attempts != 1 {
+		t.Errorf("Expected 1 attempt, got %d", attempts)
+	}
 }
