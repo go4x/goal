@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gophero/goal/collection/slicex"
+	"github.com/gophero/goal/col/slicex"
 	"github.com/gophero/got"
 )
 

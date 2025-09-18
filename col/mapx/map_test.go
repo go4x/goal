@@ -3,7 +3,7 @@ package mapx_test
 import (
 	"testing"
 
-	"github.com/gophero/goal/collection/mapx"
+	"github.com/gophero/goal/col/mapx"
 	"github.com/gophero/got"
 )
 
