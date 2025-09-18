@@ -36,6 +36,19 @@ func TestRequire(t *testing.T) {
 		}()
 		assert.Require(false, "not match the condition")
 	}()
+
+	logger.Case("test Require with format string and arguments")
+	func() {
+		defer func() {
+			err := recover()
+			if err == nil {
+				logger.Fail("should get an error with formatted message")
+			} else {
+				logger.Pass("should get an error: %v", err)
+			}
+		}()
+		assert.Require(false, "error: %s, code: %d", "test error", 500)
+	}()
 }
 func TestTrue(t *testing.T) {
 	logger := got.New(t, "test assert.True method")
@@ -224,6 +237,21 @@ func TestHasElems(t *testing.T) {
 		var s []int
 		assert.HasElems(s)
 	}()
+
+	logger.Case("give non-collection type, should not panic (do nothing)")
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Fail("should not panic for non-collection type, but got: %v", err)
+			} else {
+				logger.Pass("should not panic for non-collection type")
+			}
+		}()
+		assert.HasElems("string")
+		assert.HasElems(123)
+		assert.HasElems(true)
+		assert.HasElems(struct{}{})
+	}()
 }
 
 func TestEquals(t *testing.T) {
@@ -281,5 +309,99 @@ func TestDeepEquals(t *testing.T) {
 			}
 		}()
 		assert.DeepEquals([]int{1, 2}, []int{2, 1})
+	}()
+}
+
+func TestEdgeCases(t *testing.T) {
+	logger := got.New(t, "test assert edge cases")
+
+	logger.Case("test Blank with various whitespace combinations")
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Fail("should not panic for whitespace strings, but got: %v", err)
+			} else {
+				logger.Pass("should not panic for whitespace strings")
+			}
+		}()
+		assert.Blank(" ")
+		assert.Blank("\t")
+		assert.Blank("\n")
+		assert.Blank("\r")
+		assert.Blank(" \t\n\r ")
+	}()
+
+	logger.Case("test NotBlank with various non-whitespace strings")
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Fail("should not panic for non-whitespace strings, but got: %v", err)
+			} else {
+				logger.Pass("should not panic for non-whitespace strings")
+			}
+		}()
+		assert.NotBlank("a")
+		assert.NotBlank(" a ")
+		assert.NotBlank("\ta\n")
+	}()
+
+	logger.Case("test HasElems with different collection types")
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Fail("should not panic for non-empty collections, but got: %v", err)
+			} else {
+				logger.Pass("should not panic for non-empty collections")
+			}
+		}()
+		// Test array
+		assert.HasElems([3]int{1, 2, 3})
+		// Test map
+		assert.HasElems(map[string]int{"key": 1})
+		// Test channel
+		ch := make(chan int, 2)
+		ch <- 1
+		ch <- 2
+		assert.HasElems(ch)
+		close(ch)
+	}()
+
+	logger.Case("test Equals with different types")
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Fail("should not panic for equal values, but got: %v", err)
+			} else {
+				logger.Pass("should not panic for equal values")
+			}
+		}()
+		assert.Equals(0, 0)
+		assert.Equals("", "")
+		assert.Equals(nil, nil)
+		assert.Equals(true, true)
+		assert.Equals(false, false)
+	}()
+
+	logger.Case("test DeepEquals with complex structures")
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Fail("should not panic for deeply equal structures, but got: %v", err)
+			} else {
+				logger.Pass("should not panic for deeply equal structures")
+			}
+		}()
+		// Test nested slices
+		assert.DeepEquals([][]int{{1, 2}, {3, 4}}, [][]int{{1, 2}, {3, 4}})
+		// Test nested maps
+		assert.DeepEquals(map[string]map[string]int{"a": {"b": 1}}, map[string]map[string]int{"a": {"b": 1}})
+		// Test structs
+		type Person struct {
+			Name string
+			Age  int
+		}
+		p1 := Person{Name: "Alice", Age: 30}
+		p2 := Person{Name: "Alice", Age: 30}
+		assert.DeepEquals(p1, p2)
 	}()
 }
