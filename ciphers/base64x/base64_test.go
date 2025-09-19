@@ -68,6 +68,10 @@ func Test_base64raw_Decode(t *testing.T) {
 	}{
 		{name: "case1", args: args{str: rw, strict: []bool{true}}, want: []byte(s), wantErr: false},
 		{name: "case2", args: args{str: rw1, strict: []bool{true}}, want: []byte(ch), wantErr: false},
+		{name: "case3", args: args{str: rw, strict: []bool{false}}, want: []byte(s), wantErr: false},
+		{name: "case4", args: args{str: rw, strict: []bool{}}, want: []byte(s), wantErr: false},
+		{name: "case5", args: args{str: "!!!", strict: []bool{true}}, want: []byte{}, wantErr: true},
+		{name: "case6", args: args{str: "!!!", strict: []bool{false}}, want: []byte{}, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -119,6 +123,10 @@ func Test_base64std_Decode(t *testing.T) {
 	}{
 		{name: "case1", args: args{str: sw, strict: []bool{true}}, want: []byte(s), wantErr: false},
 		{name: "case2", args: args{str: sw1, strict: []bool{true}}, want: []byte(ch), wantErr: false},
+		{name: "case3", args: args{str: sw, strict: []bool{false}}, want: []byte(s), wantErr: false},
+		{name: "case4", args: args{str: sw, strict: []bool{}}, want: []byte(s), wantErr: false},
+		{name: "case5", args: args{str: "!!!", strict: []bool{true}}, want: []byte{}, wantErr: true},
+		{name: "case6", args: args{str: "!!!", strict: []bool{false}}, want: []byte{}, wantErr: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

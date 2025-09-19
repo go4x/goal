@@ -100,6 +100,18 @@ func Test_Base64Url_Decode(t *testing.T) {
 			want:    []byte{},
 			wantErr: true,
 		},
+		{
+			name:    "normal string non-strict",
+			args:    args{input: "aGVsbG8gd29ybGQ=", strict: []bool{false}},
+			want:    []byte("hello world"),
+			wantErr: false,
+		},
+		{
+			name:    "normal string no strict param",
+			args:    args{input: "aGVsbG8gd29ybGQ=", strict: []bool{}},
+			want:    []byte("hello world"),
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -184,6 +196,18 @@ func Test_RawBase64Url_Decode(t *testing.T) {
 			args:    args{input: "!!!", strict: []bool{true}},
 			want:    []byte{},
 			wantErr: true,
+		},
+		{
+			name:    "normal string non-strict",
+			args:    args{input: "aGVsbG8gd29ybGQ", strict: []bool{false}},
+			want:    []byte("hello world"),
+			wantErr: false,
+		},
+		{
+			name:    "normal string no strict param",
+			args:    args{input: "aGVsbG8gd29ybGQ", strict: []bool{}},
+			want:    []byte("hello world"),
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {

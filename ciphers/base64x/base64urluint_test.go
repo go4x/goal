@@ -27,6 +27,132 @@ func TestEncode(t *testing.T) {
 			},
 			want: "AA",
 		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with all zero bytes
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 0, 0, 0})
+				return bi
+			},
+			want: "AA",
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with leading zeros
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 0, 1, 2, 3})
+				return bi
+			},
+			want: "AQID", // Should remove leading zeros
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with all zeros except the last byte
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 0, 0, 0, 0})
+				return bi
+			},
+			want: "AA", // Should return "AA" for all zeros
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with all zeros - this should trigger start >= len(bytes)
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 0, 0, 0, 0, 0, 0, 0})
+				return bi
+			},
+			want: "AA", // Should return "AA" for all zeros
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with all zeros - this should trigger start >= len(bytes)
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
+				return bi
+			},
+			want: "AA", // Should return "AA" for all zeros
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with mixed zeros and non-zeros
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 0, 0, 1, 2, 3, 0, 0})
+				return bi
+			},
+			want: "AQIDAAA", // Should remove leading zeros but keep trailing zeros
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with no leading zeros
+				bi := &big.Int{}
+				bi.SetBytes([]byte{1, 2, 3, 4, 5})
+				return bi
+			},
+			want: "AQIDBAU", // Should encode normally
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with single byte
+				bi := &big.Int{}
+				bi.SetBytes([]byte{255})
+				return bi
+			},
+			want: "_w", // Should encode single byte
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with single zero byte
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0})
+				return bi
+			},
+			want: "AA", // Should return "AA" for single zero
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with two bytes, first is zero
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 1})
+				return bi
+			},
+			want: "AQ", // Should remove leading zero
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with two bytes, both non-zero
+				bi := &big.Int{}
+				bi.SetBytes([]byte{1, 2})
+				return bi
+			},
+			want: "AQI", // Should encode normally
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with three bytes, first is zero
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 1, 2})
+				return bi
+			},
+			want: "AQI", // Should remove leading zero
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with three bytes, all non-zero
+				bi := &big.Int{}
+				bi.SetBytes([]byte{1, 2, 3})
+				return bi
+			},
+			want: "AQID", // Should encode normally
+		},
+		{
+			input: func() *big.Int {
+				// Create a big.Int with four bytes, first is zero
+				bi := &big.Int{}
+				bi.SetBytes([]byte{0, 1, 2, 3})
+				return bi
+			},
+			want: "AQID", // Should remove leading zero
+		},
 	}
 
 	lg := got.New(t, "Base64UrlUintEncode")
@@ -64,7 +190,7 @@ func Test_Base64UrlUintDecode(t *testing.T) {
 			input: "",
 			valid: true,
 			want: func() *big.Int {
-				return nil
+				return &big.Int{}
 			},
 		},
 		{
@@ -98,8 +224,8 @@ func TestEncLongString(t *testing.T) {
 		t.Errorf("want no error: %v", err)
 		t.Failed()
 	}
-	if reflect.DeepEqual(bi, int2) {
-		t.Errorf("result is incorrect")
+	if !reflect.DeepEqual(bi.String(), int2) {
+		t.Errorf("result is incorrect: got %s, want %s", bi.String(), int2)
 		t.Failed()
 	}
 
