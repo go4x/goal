@@ -1,15 +1,44 @@
-// Package mapx provides a generic map type with additional utility methods.
+// Package mapx provides multiple generic map implementations with different
+// performance characteristics and use cases.
 //
-// This package offers a type-safe generic map implementation that extends
-// Go's built-in map with convenient methods for common operations.
+// This package offers three map implementations:
+//
+// 1. M (Regular Map):
+//   - Based on Go's built-in map
+//   - O(1) operations but no insertion order guarantee
+//   - Best for general-purpose use cases
+//
+// 2. ArrayMap:
+//   - Uses two parallel slices
+//   - Maintains insertion order
+//   - O(n) operations, good for small datasets
+//
+// 3. LinkedMap:
+//   - Uses doubly linked list + hash map
+//   - Maintains insertion order with O(1) operations
+//   - Best for large datasets requiring order
+//
+// All implementations implement the Map[K, V] interface for polymorphic usage.
+//
+// Quick Decision Guide:
+// - Need O(1) performance and don't care about order? → Use M
+// - Small dataset (<1000) and need order? → Use ArrayMap
+// - Large dataset and need order? → Use LinkedMap
+// - Building LRU cache? → Use LinkedMap
 //
 // Example:
 //
-//	m := mapx.New[string, int]()
-//	m.Put("a", 1).Put("b", 2)
-//	if val, ok := m.Get("a"); ok {
-//		fmt.Printf("Value: %d\n", val)
-//	}
+//	// Regular map (fastest, no order)
+//	regularMap := mapx.New[string, int]()
+//	regularMap.Put("a", 1).Put("b", 2)
+//
+//	// Array map (ordered, good for small datasets)
+//	arrayMap := mapx.NewArrayMap[string, int]()
+//	arrayMap.Put("a", 1).Put("b", 2)
+//
+//	// Linked map (ordered, good for large datasets)
+//	linkedMap := mapx.NewLinkedMap[string, int]()
+//	linkedMap.Put("a", 1).Put("b", 2)
 package mapx
 
 // M is a generic map type where K must be a comparable type (can use ==, != to compare)
