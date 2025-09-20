@@ -1,3 +1,21 @@
+// Package ciphers provides data compression functions for converting numbers to compact string representations.
+//
+// This package includes three compression functions:
+//   - C36: Base36 encoding (0-9, A-Z) - case insensitive, uppercase output
+//   - C62: Base62 encoding (0-9, a-z, A-Z) - case sensitive
+//   - C: Full character set encoding (0-9, a-z, A-Z, special chars) - case sensitive
+//
+// These functions are useful for:
+//   - URL shortening
+//   - Database ID compression
+//   - Token generation
+//   - Compact number representation
+//
+// Example usage:
+//
+//	compressed := ciphers.C62(12345) // "3d7"
+//	compressed := ciphers.C36(12345)  // "9IX"
+//	compressed := ciphers.C(12345)   // "1D*"
 package ciphers
 
 import "strings"

@@ -1,6 +1,7 @@
 package ciphers
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -122,5 +123,128 @@ func TestC_Random(t *testing.T) {
 		} else {
 			m[s] = n
 		}
+	}
+}
+
+func TestC36_EdgeCases(t *testing.T) {
+	// Test edge cases for C36
+	testCases := []struct {
+		input    uint
+		expected string
+	}{
+		{0, "0"},
+		{1, "1"},
+		{35, "Z"},
+		{36, "10"},
+		{71, "1Z"},
+		{72, "20"},
+		{1295, "ZZ"},
+		{1296, "100"},
+		{46655, "ZZZ"},
+		{46656, "1000"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("C36_%d", tc.input), func(t *testing.T) {
+			result := C36(tc.input)
+			if result != tc.expected {
+				t.Errorf("C36(%d) = %q; want %q", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestC62_EdgeCases(t *testing.T) {
+	// Test edge cases for C62
+	testCases := []struct {
+		input    uint
+		expected string
+	}{
+		{0, "0"},
+		{1, "1"},
+		{61, "Z"},
+		{62, "10"},
+		{123, "1Z"},
+		{124, "20"},
+		{3843, "ZZ"},
+		{3844, "100"},
+		{238327, "ZZZ"},
+		{238328, "1000"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("C62_%d", tc.input), func(t *testing.T) {
+			result := C62(tc.input)
+			if result != tc.expected {
+				t.Errorf("C62(%d) = %q; want %q", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestC_EdgeCases(t *testing.T) {
+	// Test edge cases for C
+	testCases := []struct {
+		input    uint
+		expected string
+	}{
+		{0, "0"},
+		{1, "1"},
+		{95, "12"},
+		{96, "13"},
+		{191, "25"},
+		{192, "26"},
+		{9215, "168"},
+		{9216, "169"},
+		{884735, "19rq"},
+		{884736, "19rr"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("C_%d", tc.input), func(t *testing.T) {
+			result := C(tc.input)
+			if result != tc.expected {
+				t.Errorf("C(%d) = %q; want %q", tc.input, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestCompressionFunctions_Consistency(t *testing.T) {
+	// Test that all compression functions are consistent
+	testNumbers := []uint{0, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000}
+
+	for _, n := range testNumbers {
+		t.Run(fmt.Sprintf("Consistency_%d", n), func(t *testing.T) {
+			c36 := C36(n)
+			c62 := C62(n)
+			c := C(n)
+
+			// All should be non-empty for non-zero inputs
+			if n > 0 {
+				if c36 == "" {
+					t.Errorf("C36(%d) returned empty string", n)
+				}
+				if c62 == "" {
+					t.Errorf("C62(%d) returned empty string", n)
+				}
+				if c == "" {
+					t.Errorf("C(%d) returned empty string", n)
+				}
+			}
+
+			// All should return "0" for zero input
+			if n == 0 {
+				if c36 != "0" {
+					t.Errorf("C36(0) = %q; want \"0\"", c36)
+				}
+				if c62 != "0" {
+					t.Errorf("C62(0) = %q; want \"0\"", c62)
+				}
+				if c != "0" {
+					t.Errorf("C(0) = %q; want \"0\"", c)
+				}
+			}
+		})
 	}
 }

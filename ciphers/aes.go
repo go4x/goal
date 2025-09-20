@@ -1,3 +1,22 @@
+// Package ciphers provides cryptographic functions for encryption, decryption, and data compression.
+//
+// This package includes:
+//   - AES encryption/decryption with ECB and CBC modes
+//   - Base36, Base62, and full character set compression functions
+//
+// SECURITY WARNINGS:
+//   - ECB mode is NOT secure and should NOT be used in production
+//   - Always use CBC mode with a random IV for secure encryption
+//   - Ensure keys are cryptographically random and properly sized
+//
+// Example usage:
+//
+//	// Secure encryption (recommended)
+//	encrypted, err := ciphers.AES.Encrypt(data, key, ciphers.CBC, randomIV)
+//	decrypted, err := ciphers.AES.Decrypt(encrypted, key, ciphers.CBC, randomIV)
+//
+//	// Data compression
+//	compressed := ciphers.C62(12345) // "3d7"
 package ciphers
 
 import (
@@ -21,17 +40,31 @@ type AESMode int
 
 const (
 	// ECB mode: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#ECB
-	// ECB mode has security issues, it is not recommended to use, see: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption/20946#20946
+	// WARNING: ECB mode has serious security vulnerabilities and should NOT be used for production.
+	// ECB mode is vulnerable to pattern analysis attacks and does not provide semantic security.
+	// See: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption/20946#20946
+	// Use CBC mode with a random IV instead.
 	ECB AESMode = iota
 	// CBC mode: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC
+	// CBC mode is more secure than ECB but requires a random IV for each encryption.
+	// The IV must be 16 bytes long and should be cryptographically random.
 	CBC
 )
 
 func (a *aeser) Encrypt(rawBytes []byte, key []byte, mode AESMode, iv []byte) ([]byte, error) {
+	// Validate key length
+	if len(key) != 16 && len(key) != 24 && len(key) != 32 {
+		return nil, errorx.New("invalid key length: %d bytes, must be 16, 24, or 32 bytes", len(key))
+	}
+
 	switch mode {
 	case ECB:
 		return aesEncryptECB(rawBytes, key)
 	case CBC:
+		// Validate IV length for CBC mode
+		if len(iv) != 16 {
+			return nil, errorx.New("invalid IV length: %d bytes, must be 16 bytes for AES", len(iv))
+		}
 		return aesEncryptCBC(rawBytes, key, iv)
 	default:
 		return nil, errorx.New("unsupported encrypt mode: %v", mode)
@@ -39,10 +72,19 @@ func (a *aeser) Encrypt(rawBytes []byte, key []byte, mode AESMode, iv []byte) ([
 }
 
 func (a *aeser) Decrypt(cipherBytes []byte, key []byte, mode AESMode, iv []byte) ([]byte, error) {
+	// Validate key length
+	if len(key) != 16 && len(key) != 24 && len(key) != 32 {
+		return nil, errorx.New("invalid key length: %d bytes, must be 16, 24, or 32 bytes", len(key))
+	}
+
 	switch mode {
 	case ECB:
 		return aesDecryptECB(cipherBytes, key)
 	case CBC:
+		// Validate IV length for CBC mode
+		if len(iv) != 16 {
+			return nil, errorx.New("invalid IV length: %d bytes, must be 16 bytes for AES", len(iv))
+		}
 		return aesDecryptCBC(cipherBytes, key, iv)
 	default:
 		return nil, errorx.New("unsupported decrypt mode: %v", mode)
@@ -69,15 +111,15 @@ func pkcs7UnPadding(cipherText []byte) ([]byte, error) {
 	// get the padding length, the last byte of the cipherText represents the number of padding bytes
 	unPadding := int(cipherText[length-1])
 
-	// validate padding
-	if unPadding == 0 || unPadding > length {
-		return nil, errorx.New("invalid padding")
+	// validate padding - check for reasonable bounds
+	if unPadding == 0 || unPadding > length || unPadding > 16 {
+		return nil, errorx.New("invalid padding: padding length %d is invalid", unPadding)
 	}
 
 	// check if all padding bytes are correct
 	for i := length - unPadding; i < length; i++ {
 		if cipherText[i] != byte(unPadding) {
-			return nil, errorx.New("invalid padding")
+			return nil, errorx.New("invalid padding: padding bytes are inconsistent")
 		}
 	}
 
