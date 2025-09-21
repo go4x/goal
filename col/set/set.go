@@ -1,7 +1,6 @@
-package set
-
-// Set is a generic set interface that maintains unique elements.
-// It provides set semantics similar to Java's Set interface.
+// Package set provides generic set implementations that maintain unique elements.
+// It offers set semantics similar to Java's Set interface with multiple implementation
+// options optimized for different use cases.
 //
 // This package offers three set implementations:
 //
@@ -20,10 +19,13 @@ package set
 //   - Maintains insertion order
 //   - Best for large datasets requiring order
 //
+// All implementations implement the Set[T] interface for polymorphic usage.
+//
 // Quick Decision Guide:
 // - Need O(1) performance and don't care about order? → Use NewHashSet()
 // - Small dataset (<1000) and need order? → Use NewArraySet()
 // - Large dataset and need order? → Use NewLinkedSet()
+// - Building LRU cache? → Use NewLinkedSet()
 //
 // Example:
 //
@@ -38,6 +40,9 @@ package set
 //	// Linked set (ordered, good for large datasets)
 //	linkedSet := set.NewLinkedSet[string]()
 //	linkedSet.Add("a").Add("b").Add("a")
+package set
+
+// Set is a generic set interface that maintains unique elements.
 type Set[T any] interface {
 	// Add adds an element to the set (no duplicates)
 	Add(t T) Set[T]

@@ -1,3 +1,31 @@
+// Package slicex provides enhanced slice operations with immutability guarantees.
+// It offers a generic slice wrapper (S[T]) with additional methods for filtering,
+// mapping, sorting, and other operations while maintaining immutability principles.
+//
+// Key Features:
+//   - Immutable operations: All methods return new slices without modifying originals
+//   - Generic type support: Works with any comparable type
+//   - Rich functionality: Filter, map, sort, reverse, union, intersect, etc.
+//   - Performance optimized: Uses hash maps for O(n+m) operations where possible
+//
+// The package includes two main types:
+//
+// 1. S[T]: The main generic slice type with enhanced methods
+// 2. SortableSlice[T]: A helper type for sorting operations
+//
+// All operations maintain immutability - the original slice is never modified.
+//
+// Example:
+//
+//	// Create and manipulate slices
+//	numbers := slicex.From([]int{3, 1, 4, 1, 5})
+//	filtered := numbers.Filter(func(x int) bool { return x > 2 })
+//	sorted := numbers.Sort(func(a, b int) bool { return a < b })
+//
+//	// Original slice remains unchanged
+//	fmt.Println(numbers.To()) // [3 1 4 1 5]
+//	fmt.Println(filtered.To()) // [3 4 5]
+//	fmt.Println(sorted.To()) // [1 1 3 4 5]
 package slicex
 
 import (
