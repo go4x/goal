@@ -63,25 +63,25 @@ func ParseTime(s string) int64 {
 		case 2:
 			var s int64
 			if tmp[0] != "" {
-				s += conv.StrToInt64(tmp[0]) * 60
+				s += conv.StrToInt64Safe(tmp[0], 0) * 60
 			}
 			if tmp[1] != "" {
-				s += conv.StrToInt64(tmp[1])
+				s += conv.StrToInt64Safe(tmp[1], 0)
 			}
 			return s
 		case 3:
 			var s int64
 			if tmp[0] != "" {
-				s += conv.StrToInt64(tmp[0]) * 60 * 60
+				s += conv.StrToInt64Safe(tmp[0], 0) * 60 * 60
 			}
 			if tmp[1] != "" {
-				s += conv.StrToInt64(tmp[1]) * 60
+				s += conv.StrToInt64Safe(tmp[1], 0) * 60
 			}
 			if tmp[2] != "" {
-				s += conv.StrToInt64(tmp[2])
+				s += conv.StrToInt64Safe(tmp[2], 0)
 			}
 			return s
 		}
 	}
-	return conv.StrToInt64(s)
+	return conv.StrToInt64Safe(s, 0)
 }
