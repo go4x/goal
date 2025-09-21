@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gophero/goal/constraint"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/constraints"
 )
 
 func TestMulBigFloat(t *testing.T) {
@@ -30,7 +30,7 @@ func TestMaxn(t *testing.T) {
 	assert.Equal(t, -1, Maxn(ints...))
 }
 
-func maxn[T constraint.Number](ns ...T) T {
+func maxn[T constraints.Integer | constraints.Float](ns ...T) T {
 	var max, tmp T
 	for i := 0; i < len(ns); i++ {
 		tmp = ns[i]
@@ -83,7 +83,7 @@ func TestMinn(t *testing.T) {
 	assert.Equal(t, -1, Minn(ints...))
 }
 
-func minn[T constraint.Number](ns ...T) T {
+func minn[T constraints.Integer | constraints.Float](ns ...T) T {
 	var min, tmp T = ns[0], ns[0]
 	for i := 0; i < len(ns); i++ {
 		tmp = ns[i]

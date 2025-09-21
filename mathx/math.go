@@ -3,7 +3,7 @@ package mathx
 import (
 	"math/big"
 
-	"github.com/gophero/goal/constraint"
+	"golang.org/x/exp/constraints"
 )
 
 func Add(addend1 float64, addend2 float64) float64 {
@@ -57,7 +57,7 @@ func MulBigFloat(multiplicand *big.Float, multiplier *big.Float) *big.Float {
 //	return f1.
 // }
 
-func Maxn[T constraint.Number](ns ...T) T {
+func Maxn[T constraints.Integer | constraints.Float](ns ...T) T {
 	max := ns[0]
 	var a, b T
 	for i, j := 0, len(ns)-1; i < len(ns)/2 && j > i; {
@@ -77,7 +77,7 @@ func Maxn[T constraint.Number](ns ...T) T {
 	return max
 }
 
-func Minn[T constraint.Number](ns ...T) T {
+func Minn[T constraints.Integer | constraints.Float](ns ...T) T {
 	min := ns[0]
 	var a, b T
 	for i, j := 0, len(ns)-1; i < len(ns)/2 && j > i; {
@@ -97,7 +97,7 @@ func Minn[T constraint.Number](ns ...T) T {
 	return min
 }
 
-func Sumn[T constraint.Number](ns ...T) T {
+func Sumn[T constraints.Integer | constraints.Float](ns ...T) T {
 	var r T
 	for _, v := range ns {
 		r += v
