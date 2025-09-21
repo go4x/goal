@@ -2,9 +2,10 @@ package prob
 
 import (
 	"fmt"
-	"github.com/gophero/goal/assert"
 	"math/rand"
 	"time"
+
+	"github.com/go4x/goal/assert"
 )
 
 // Percent method calculates the percentage probability. Define a number within 100,

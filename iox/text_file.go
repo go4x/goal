@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gophero/goal/errorx"
+	"github.com/go4x/goal/errorx"
 )
 
 type TxtFile struct {

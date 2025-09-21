@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gophero/goal/errorx"
+	"github.com/go4x/goal/errorx"
 )
 
 // Handler is a function that will be called when the request is successful

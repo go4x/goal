@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophero/goal/jsonx"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/jsonx"
+	"github.com/go4x/got"
 )
 
 func TestToJson(t *testing.T) {

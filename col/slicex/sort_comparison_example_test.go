@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophero/goal/col/slicex"
+	"github.com/go4x/goal/col/slicex"
 )
 
 // ExampleS_Sort_immutable demonstrates the immutable Sort method

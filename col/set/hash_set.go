@@ -1,7 +1,7 @@
 package set
 
 import (
-	"github.com/gophero/goal/col/mapx"
+	"github.com/go4x/goal/col/mapx"
 )
 
 // HashSet is a set implementation using hash map for O(1) operations.

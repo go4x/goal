@@ -3,7 +3,7 @@ package assert_test
 import (
 	"testing"
 
-	"github.com/gophero/goal/assert"
+	"github.com/go4x/goal/assert"
 )
 
 // Example demonstrates the correct usage of the assert package in tests.

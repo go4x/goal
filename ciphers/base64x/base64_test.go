@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gophero/goal/ciphers/base64x"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/ciphers/base64x"
+	"github.com/go4x/got"
 )
 
 var s = "abcdefghijjklmnopqrstuvwxyz0123456789`~-_=+[]\\{}|;':\",./<>?"

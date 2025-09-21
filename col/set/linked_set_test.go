@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophero/got"
+	"github.com/go4x/got"
 )
 
 func TestLinkedSet(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gophero/goal/errorx"
+	"github.com/go4x/goal/errorx"
 )
 
 // TODO 筛选过滤

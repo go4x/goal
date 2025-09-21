@@ -3,7 +3,7 @@ package mapx_test
 import (
 	"fmt"
 
-	"github.com/gophero/goal/col/mapx"
+	"github.com/go4x/goal/col/mapx"
 )
 
 // ExampleMap demonstrates that M, ArrayMap, and LinkedMap all implement the Map interface

@@ -1,6 +1,6 @@
 package tests
 
-import "github.com/gophero/logx"
+import "github.com/go4x/logx"
 
 func NewLog() logx.Logger {
 	logx.Init(&logx.LoggerConfig{

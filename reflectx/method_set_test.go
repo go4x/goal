@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophero/goal/reflectx"
+	"github.com/go4x/goal/reflectx"
 	"github.com/stretchr/testify/assert"
 )
 

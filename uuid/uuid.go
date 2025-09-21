@@ -1,9 +1,10 @@
 package uuid
 
 import (
-	"github.com/google/uuid"
-	"github.com/gophero/goal/valuex"
 	"strings"
+
+	"github.com/go4x/goal/valuex"
+	"github.com/google/uuid"
 )
 
 func UUID() string {

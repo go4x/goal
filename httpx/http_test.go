@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophero/goal/httpx"
+	"github.com/go4x/goal/httpx"
 	"github.com/stretchr/testify/assert"
 )
 

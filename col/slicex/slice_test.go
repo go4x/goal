@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gophero/goal/col/slicex"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/col/slicex"
+	"github.com/go4x/got"
 )
 
 var testSlice = []int{1, 2, 3, 4, 5, 6, 7, 8, 9}

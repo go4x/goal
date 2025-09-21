@@ -3,8 +3,8 @@ package assert_test
 import (
 	"testing"
 
-	"github.com/gophero/goal/assert"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/assert"
+	"github.com/go4x/got"
 )
 
 func TestRequire(t *testing.T) {

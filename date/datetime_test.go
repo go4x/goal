@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophero/goal/date"
+	"github.com/go4x/goal/date"
 )
 
 func TestParseDate(t *testing.T) {

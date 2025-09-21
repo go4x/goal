@@ -3,8 +3,8 @@ package mapx_test
 import (
 	"testing"
 
-	"github.com/gophero/goal/col/mapx"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/col/mapx"
+	"github.com/go4x/got"
 	"github.com/stretchr/testify/assert"
 )
 

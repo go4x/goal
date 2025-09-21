@@ -3,7 +3,7 @@ package mapx_test
 import (
 	"fmt"
 
-	"github.com/gophero/goal/col/mapx"
+	"github.com/go4x/goal/col/mapx"
 )
 
 // ExampleArrayMap demonstrates basic usage of ArrayMap

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophero/goal/ciphers"
-	"github.com/gophero/goal/random"
+	"github.com/go4x/goal/ciphers"
+	"github.com/go4x/goal/random"
 )
 
 var plainText = "exampleplaintext" // 16 bytes

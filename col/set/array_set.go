@@ -1,7 +1,7 @@
 package set
 
 import (
-	"github.com/gophero/goal/col/mapx"
+	"github.com/go4x/goal/col/mapx"
 )
 
 // ArraySet is a set implementation using array-based map for ordered elements.

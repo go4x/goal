@@ -2,9 +2,10 @@ package printer
 
 import (
 	"fmt"
-	"github.com/gophero/goal/conv"
 	"strconv"
 	"strings"
+
+	"github.com/go4x/goal/conv"
 )
 
 func NewLine() {

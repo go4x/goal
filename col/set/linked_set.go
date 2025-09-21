@@ -1,7 +1,7 @@
 package set
 
 import (
-	"github.com/gophero/goal/col/mapx"
+	"github.com/go4x/goal/col/mapx"
 )
 
 // LinkedSet is a set implementation using linked map for O(1) operations with order.

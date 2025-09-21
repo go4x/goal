@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gophero/goal/prob"
+	"github.com/go4x/goal/prob"
 )
 
 func TestPercentProb0(t *testing.T) {

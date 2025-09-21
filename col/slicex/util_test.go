@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophero/goal/col/slicex"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/col/slicex"
+	"github.com/go4x/got"
 )
 
 // TestEach tests the Each function

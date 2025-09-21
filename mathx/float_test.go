@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophero/goal/assert"
+	"github.com/go4x/goal/assert"
 )
 
 func TestRound(t *testing.T) {

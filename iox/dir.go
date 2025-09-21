@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/gophero/goal/errorx"
+	"github.com/go4x/goal/errorx"
 )
 
 var Dir = &dirs{}

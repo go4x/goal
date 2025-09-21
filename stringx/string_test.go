@@ -3,9 +3,9 @@ package stringx_test
 import (
 	"testing"
 
-	"github.com/gophero/goal/assert"
-	"github.com/gophero/goal/stringx"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/assert"
+	"github.com/go4x/goal/stringx"
+	"github.com/go4x/got"
 )
 
 func TestBlurEmail(t *testing.T) {

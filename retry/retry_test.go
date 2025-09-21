@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophero/goal/retry"
+	"github.com/go4x/goal/retry"
 )
 
 // TestBasicRetry tests the basic retry functionality

@@ -32,7 +32,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gophero/goal/stringx"
+	"github.com/go4x/goal/stringx"
 )
 
 // S is a generic slice type that provides additional methods for slice manipulation.

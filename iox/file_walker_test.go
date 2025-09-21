@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophero/goal/iox"
+	"github.com/go4x/goal/iox"
 )
 
 func TestWalkAllFiles(t *testing.T) {

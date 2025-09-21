@@ -4,7 +4,7 @@ import (
 	"context"
 	"runtime/debug"
 
-	"github.com/gophero/logx"
+	"github.com/go4x/logx"
 )
 
 // Recover is used with defer to do cleanup on panics.

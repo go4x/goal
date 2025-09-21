@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gophero/goal/conv"
+	"github.com/go4x/goal/conv"
 )
 
 func ExampleInt64ToHex() {

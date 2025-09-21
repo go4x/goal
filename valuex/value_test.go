@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gophero/got"
+	"github.com/go4x/got"
 )
 
 func TestMust(t *testing.T) {

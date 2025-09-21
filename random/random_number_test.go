@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophero/goal/random"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/random"
+	"github.com/go4x/got"
 )
 
 func TestInt(t *testing.T) {

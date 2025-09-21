@@ -3,8 +3,8 @@ package iox_test
 import (
 	"testing"
 
-	"github.com/gophero/goal/iox"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/iox"
+	"github.com/go4x/got"
 )
 
 func TestExists(t *testing.T) {

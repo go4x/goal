@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophero/goal/conv"
+	"github.com/go4x/goal/conv"
 )
 
 // StrTime 时间转换函数

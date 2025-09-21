@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/gophero/goal/httpx"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/httpx"
+	"github.com/go4x/got"
 )
 
 const (

@@ -24,7 +24,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 
-	"github.com/gophero/goal/errorx"
+	"github.com/go4x/goal/errorx"
 )
 
 // AES encrypt and decrypt object

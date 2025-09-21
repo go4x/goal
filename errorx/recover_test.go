@@ -5,9 +5,9 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/gophero/goal/errorx"
-	"github.com/gophero/goal/tests"
-	"github.com/gophero/logx"
+	"github.com/go4x/goal/errorx"
+	"github.com/go4x/goal/tests"
+	"github.com/go4x/logx"
 	"github.com/stretchr/testify/assert"
 )
 

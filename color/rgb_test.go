@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gophero/goal/color"
-	"github.com/gophero/got"
+	"github.com/go4x/goal/color"
+	"github.com/go4x/got"
 )
 
 func TestRgb(t *testing.T) {

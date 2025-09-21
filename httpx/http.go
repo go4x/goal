@@ -8,7 +8,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/gophero/goal/errorx"
+	"github.com/go4x/goal/errorx"
 )
 
 // defaultClient is the default http client with a timeout of 60 seconds

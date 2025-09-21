@@ -3,7 +3,7 @@ package hash
 import (
 	"testing"
 
-	"github.com/gophero/got"
+	"github.com/go4x/got"
 )
 
 func TestSHA256(t *testing.T) {
