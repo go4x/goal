@@ -3,7 +3,6 @@ package conv_test
 import (
 	"fmt"
 	"math"
-	"math/big"
 	"reflect"
 	"testing"
 
@@ -28,9 +27,9 @@ func ExampleHexToInt64() {
 	ys := "7fffffffffffffff"
 	zs := "7fffffff"
 
-	x := conv.HexToInt64(xs)
-	y := conv.HexToInt64(ys)
-	z := conv.HexToInt64(zs)
+	x, _ := conv.HexToInt64(xs)
+	y, _ := conv.HexToInt64(ys)
+	z, _ := conv.HexToInt64(zs)
 	fmt.Println(x, y, z) // -9223372036854775808 9223372036854775807 2147483647
 }
 
@@ -53,7 +52,12 @@ func TestHexToInt64(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := conv.HexToInt64(tt.args.src); got != tt.want {
+			got, err := conv.HexToInt64(tt.args.src)
+			if err != nil {
+				t.Errorf("HexToInt64() error = %v", err)
+				return
+			}
+			if got != tt.want {
 				t.Errorf("HexToInt64() = %v, want %v", got, tt.want)
 			}
 		})
@@ -83,7 +87,6 @@ func TestInt32ToStr(t *testing.T) {
 	}
 }
 
-// -9223372036854775808 9223372036854775807
 func TestInt64ToHex(t *testing.T) {
 	type args struct {
 		src int64
@@ -180,53 +183,6 @@ func TestIntsToStr(t *testing.T) {
 	}
 }
 
-func TestJoinBigInt(t *testing.T) {
-	var bigs = []*big.Int{big.NewInt(1), big.NewInt(0), big.NewInt(math.MaxInt64)}
-	type args struct {
-		ints []*big.Int
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{name: "case 1", args: args{ints: []*big.Int{big.NewInt(0)}}, want: "0"},
-		{name: "case 2", args: args{ints: []*big.Int{big.NewInt(-1)}}, want: "-1"},
-		{name: "case 3", args: args{ints: bigs}, want: "1,0,9223372036854775807"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := conv.JoinBigInt(tt.args.ints); got != tt.want {
-				t.Errorf("JoinBigInt() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestSplitStrToInt(t *testing.T) {
-	type args struct {
-		s   string
-		sep string
-	}
-	tests := []struct {
-		name string
-		args args
-		want []int64
-	}{
-		{name: "case 1", args: args{s: "-1,0,1", sep: ","}, want: []int64{-1, 0, 1}},
-		{name: "case 2", args: args{s: "-1", sep: ","}, want: []int64{-1}},
-		{name: "case 3", args: args{s: "0", sep: ""}, want: []int64{0}},
-		{name: "case 4", args: args{s: "0#1#2#3", sep: "#"}, want: []int64{0, 1, 2, 3}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := conv.SplitStrToInt(tt.args.s, tt.args.sep); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("SplitStrToInt() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestStrToFloat64(t *testing.T) {
 	type args struct {
 		amount string
@@ -243,8 +199,406 @@ func TestStrToFloat64(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := conv.StrToFloat64(tt.args.amount); got != tt.want {
+			got, err := conv.StrToFloat64(tt.args.amount)
+			if err != nil {
+				t.Errorf("StrToFloat64() error = %v", err)
+				return
+			}
+			if got != tt.want {
 				t.Errorf("StrToFloat64() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// Test safe version functions
+func TestStrToIntSafe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue int
+		want         int
+	}{
+		{name: "valid string", str: "123", defaultValue: 0, want: 123},
+		{name: "invalid string", str: "abc", defaultValue: 999, want: 999},
+		{name: "empty string", str: "", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToIntSafe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToIntSafe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// Test error handling
+func TestStrToIntError(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		wantErr bool
+	}{
+		{name: "valid string", str: "123", wantErr: false},
+		{name: "invalid string", str: "abc", wantErr: true},
+		{name: "empty string", str: "", wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := conv.StrToInt(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToInt() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// Test all string to int conversion functions
+func TestStrToInt32(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		want    int32
+		wantErr bool
+	}{
+		{name: "valid string", str: "123", want: 123, wantErr: false},
+		{name: "invalid string", str: "abc", want: 0, wantErr: true},
+		{name: "empty string", str: "", want: 0, wantErr: true},
+		{name: "max int32", str: "2147483647", want: math.MaxInt32, wantErr: false},
+		{name: "min int32", str: "-2147483648", want: math.MinInt32, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrToInt32(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToInt32() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("StrToInt32() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToInt64(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		want    int64
+		wantErr bool
+	}{
+		{name: "valid string", str: "123", want: 123, wantErr: false},
+		{name: "invalid string", str: "abc", want: 0, wantErr: true},
+		{name: "empty string", str: "", want: 0, wantErr: true},
+		{name: "max int64", str: "9223372036854775807", want: math.MaxInt64, wantErr: false},
+		{name: "min int64", str: "-9223372036854775808", want: math.MinInt64, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrToInt64(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToInt64() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("StrToInt64() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToUint(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		want    uint
+		wantErr bool
+	}{
+		{name: "valid string", str: "123", want: 123, wantErr: false},
+		{name: "invalid string", str: "abc", want: 0, wantErr: true},
+		{name: "negative string", str: "-1", want: 0, wantErr: true},
+		{name: "empty string", str: "", want: 0, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrToUint(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToUint() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("StrToUint() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToUint64(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		want    uint64
+		wantErr bool
+	}{
+		{name: "valid string", str: "123", want: 123, wantErr: false},
+		{name: "invalid string", str: "abc", want: 0, wantErr: true},
+		{name: "negative string", str: "-1", want: 0, wantErr: true},
+		{name: "empty string", str: "", want: 0, wantErr: true},
+		{name: "max uint64", str: "18446744073709551615", want: math.MaxUint64, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrToUint64(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToUint64() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("StrToUint64() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToUint32(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		want    uint32
+		wantErr bool
+	}{
+		{name: "valid string", str: "123", want: 123, wantErr: false},
+		{name: "invalid string", str: "abc", want: 0, wantErr: true},
+		{name: "negative string", str: "-1", want: 0, wantErr: true},
+		{name: "empty string", str: "", want: 0, wantErr: true},
+		{name: "max uint32", str: "4294967295", want: math.MaxUint32, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrToUint32(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToUint32() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("StrToUint32() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToBool(t *testing.T) {
+	tests := []struct {
+		name    string
+		str     string
+		want    bool
+		wantErr bool
+	}{
+		{name: "true string", str: "true", want: true, wantErr: false},
+		{name: "false string", str: "false", want: false, wantErr: false},
+		{name: "1 string", str: "1", want: true, wantErr: false},
+		{name: "0 string", str: "0", want: false, wantErr: false},
+		{name: "invalid string", str: "abc", want: false, wantErr: true},
+		{name: "empty string", str: "", want: false, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrToBool(tt.str)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrToBool() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("StrToBool() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrsToInt(t *testing.T) {
+	tests := []struct {
+		name    string
+		ss      []string
+		want    []int64
+		wantErr bool
+	}{
+		{name: "valid strings", ss: []string{"1", "2", "3"}, want: []int64{1, 2, 3}, wantErr: false},
+		{name: "empty slice", ss: []string{}, want: nil, wantErr: false},
+		{name: "nil slice", ss: nil, want: nil, wantErr: false},
+		{name: "invalid string in slice", ss: []string{"1", "abc", "3"}, want: nil, wantErr: true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := conv.StrsToInt(tt.ss)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("StrsToInt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("StrsToInt() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// Test all safe version functions
+func TestStrToInt32Safe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue int32
+		want         int32
+	}{
+		{name: "valid string", str: "123", defaultValue: 0, want: 123},
+		{name: "invalid string", str: "abc", defaultValue: 999, want: 999},
+		{name: "empty string", str: "", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToInt32Safe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToInt32Safe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToInt64Safe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue int64
+		want         int64
+	}{
+		{name: "valid string", str: "123", defaultValue: 0, want: 123},
+		{name: "invalid string", str: "abc", defaultValue: 999, want: 999},
+		{name: "empty string", str: "", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToInt64Safe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToInt64Safe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToUintSafe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue uint
+		want         uint
+	}{
+		{name: "valid string", str: "123", defaultValue: 0, want: 123},
+		{name: "invalid string", str: "abc", defaultValue: 999, want: 999},
+		{name: "negative string", str: "-1", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToUintSafe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToUintSafe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToUint64Safe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue uint64
+		want         uint64
+	}{
+		{name: "valid string", str: "123", defaultValue: 0, want: 123},
+		{name: "invalid string", str: "abc", defaultValue: 999, want: 999},
+		{name: "negative string", str: "-1", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToUint64Safe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToUint64Safe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToUint32Safe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue uint32
+		want         uint32
+	}{
+		{name: "valid string", str: "123", defaultValue: 0, want: 123},
+		{name: "invalid string", str: "abc", defaultValue: 999, want: 999},
+		{name: "negative string", str: "-1", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToUint32Safe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToUint32Safe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToFloat64Safe(t *testing.T) {
+	tests := []struct {
+		name         string
+		amount       string
+		defaultValue float64
+		want         float64
+	}{
+		{name: "valid string", amount: "123.45", defaultValue: 0, want: 123.45},
+		{name: "invalid string", amount: "abc", defaultValue: 999.99, want: 999.99},
+		{name: "empty string", amount: "", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToFloat64Safe(tt.amount, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToFloat64Safe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHexToInt64Safe(t *testing.T) {
+	tests := []struct {
+		name         string
+		src          string
+		defaultValue int64
+		want         int64
+	}{
+		{name: "valid hex", src: "FF", defaultValue: 0, want: 255},
+		{name: "invalid hex", src: "GG", defaultValue: 999, want: 999},
+		{name: "empty string", src: "", defaultValue: 0, want: 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.HexToInt64Safe(tt.src, tt.defaultValue); got != tt.want {
+				t.Errorf("HexToInt64Safe() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStrToBoolSafe(t *testing.T) {
+	tests := []struct {
+		name         string
+		str          string
+		defaultValue bool
+		want         bool
+	}{
+		{name: "valid true", str: "true", defaultValue: false, want: true},
+		{name: "valid false", str: "false", defaultValue: true, want: false},
+		{name: "invalid string", str: "abc", defaultValue: true, want: true},
+		{name: "empty string", str: "", defaultValue: false, want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := conv.StrToBoolSafe(tt.str, tt.defaultValue); got != tt.want {
+				t.Errorf("StrToBoolSafe() = %v, want %v", got, tt.want)
 			}
 		})
 	}
