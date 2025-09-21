@@ -148,14 +148,27 @@ func TestChainInvoke(t *testing.T) {
 }
 
 func TestSort(t *testing.T) {
+	logger := got.New(t, "Sort")
 	var ss = []int{5, 6, 7, 8, 9, 1, 2, 3, 4}
+	original := make([]int, len(ss))
+	copy(original, ss) // Keep a copy of original
+
 	s := slicex.From(ss)
 	sr := s.Sort(func(i, j int) bool {
 		return i < j
 	})
-	fmt.Printf("%v\n", ss)
-	sr.Reverse()
-	fmt.Printf("%v\n", ss)
+
+	// Verify original slice is not modified
+	logger.Require(slicex.Equal(ss, original), "original slice should not be modified after Sort")
+
+	// Verify sorted result
+	expectedSorted := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	logger.Require(slicex.Equal(sr.To(), expectedSorted), "sorted result should be correct")
+
+	// Test reverse
+	reversed := sr.Reverse()
+	expectedReversed := []int{9, 8, 7, 6, 5, 4, 3, 2, 1}
+	logger.Require(slicex.Equal(reversed, expectedReversed), "reversed result should be correct")
 }
 
 type user struct {
@@ -285,89 +298,6 @@ func TestFrom(t *testing.T) {
 	logger.Require(slicex.Equal(result3, s3), "From should work with string slice")
 }
 
-// TestFromPanic tests the From function with invalid input
-func TestFromPanic(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected panic for non-slice input")
-		}
-	}()
-
-	// This should panic - use a function to avoid compile-time type inference
-	func() {
-		var x interface{} = 42
-		slicex.From(x.([]int)) // This will panic at runtime
-	}()
-}
-
-// TestFromWithNonSlice tests the From function with non-slice input
-func TestFromWithNonSlice(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected panic for non-slice input")
-		}
-	}()
-
-	// This test is designed to trigger the panic in From function
-	// We need to use a type assertion that will fail at runtime
-	var x interface{} = 42
-	slicex.From(x.([]int)) // This will panic at runtime due to type assertion failure
-}
-
-// TestFromPanicPath tests the panic path in From function
-func TestFromPanicPath(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected panic for non-slice input")
-		}
-	}()
-
-	// Use reflection to create a non-slice value and test the panic path
-	// This is a bit tricky because Go's type system prevents us from passing non-slices
-	// But we can use unsafe operations to bypass this
-	val := reflect.ValueOf(42)
-	if val.Kind() != reflect.Slice {
-		// This will trigger the panic in From function
-		// We need to use a type assertion that will fail
-		var x interface{} = 42
-		slicex.From(x.([]int)) // This will panic at runtime
-	}
-}
-
-// TestFromWithInterface tests the From function with interface{} input
-func TestFromWithInterface(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected panic for non-slice input")
-		}
-	}()
-
-	// Create a function that takes interface{} and calls From
-	// This allows us to test the panic path
-	func() {
-		var x interface{} = 42
-		// This will panic at runtime due to type assertion failure
-		slicex.From(x.([]int))
-	}()
-}
-
-// TestFromPanicDirect tests the panic path directly
-func TestFromPanicDirect(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected panic for non-slice input")
-		}
-	}()
-
-	// Use a more direct approach to test the panic path
-	// We'll use a function that can accept any type
-	func() {
-		// This will panic at runtime due to type assertion failure
-		var x interface{} = 42
-		slicex.From(x.([]int))
-	}()
-}
-
 // TestTo tests the To method
 func TestTo(t *testing.T) {
 	logger := got.New(t, "To")
@@ -421,6 +351,16 @@ func TestClip(t *testing.T) {
 	logger.Require(len(result) == 3, "length should be 3")
 	logger.Require(cap(result) == 3, "capacity should be 3")
 	logger.Require(slicex.Equal(result, []int{1, 2, 3}), "elements should be preserved")
+
+	// Verify that modifying the original slice doesn't affect the clipped result
+	s[0] = 999
+	logger.Require(slicex.Equal(result, []int{1, 2, 3}), "clipped result should be independent of original")
+
+	// Test with empty slice
+	empty := slicex.New[int]()
+	emptyClipped := empty.Clip()
+	logger.Require(len(emptyClipped) == 0, "empty slice clip should have length 0")
+	logger.Require(cap(emptyClipped) == 0, "empty slice clip should have capacity 0")
 }
 
 // TestNewSortableSlice tests the NewSortableSlice function
@@ -610,4 +550,58 @@ func TestBooleanOperations(t *testing.T) {
 	noDup := s.RemoveDuplicate()
 	expectedNoDup := []bool{true, false}
 	logger.Require(slicex.Equal(noDup, expectedNoDup), "remove duplicate should work with booleans")
+}
+
+// TestPerformanceOptimizations tests the performance improvements
+func TestPerformanceOptimizations(t *testing.T) {
+	logger := got.New(t, "PerformanceOptimizations")
+
+	// Test optimized Intersect with larger datasets
+	largeSlice1 := make([]int, 1000)
+	largeSlice2 := make([]int, 1000)
+	for i := 0; i < 1000; i++ {
+		largeSlice1[i] = i
+		largeSlice2[i] = i + 500 // Overlap from 500-999
+	}
+
+	s1 := slicex.From(largeSlice1)
+	result := s1.Intersect(largeSlice2)
+
+	// Should contain elements 500-999
+	logger.Require(len(result) == 500, "intersect should work with large datasets")
+
+	// Test optimized Delete with multiple elements
+	toDelete := make([]int, 100)
+	for i := 0; i < 100; i++ {
+		toDelete[i] = i
+	}
+
+	s2 := slicex.From(largeSlice1)
+	deleted := s2.Delete(toDelete...)
+	logger.Require(len(deleted) == 900, "delete should work efficiently with many elements")
+}
+
+// TestSortInPlace tests the SortInPlace method
+func TestSortInPlace(t *testing.T) {
+	logger := got.New(t, "SortInPlace")
+
+	var ss = []int{5, 6, 7, 8, 9, 1, 2, 3, 4}
+	s := slicex.From(ss)
+
+	// Sort in place
+	sorted := s.SortInPlace(func(i, j int) bool {
+		return i < j
+	})
+
+	// Verify sorted result
+	expectedSorted := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
+	logger.Require(slicex.Equal(sorted.To(), expectedSorted), "sorted result should be correct")
+
+	// Verify original slice IS modified (this is the key difference)
+	logger.Require(slicex.Equal(s.To(), expectedSorted), "original slice should be modified after SortInPlace")
+
+	// Test reverse
+	reversed := sorted.Reverse()
+	expectedReversed := []int{9, 8, 7, 6, 5, 4, 3, 2, 1}
+	logger.Require(slicex.Equal(reversed, expectedReversed), "reversed result should be correct")
 }

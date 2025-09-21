@@ -7,75 +7,6 @@ import (
 	"github.com/gophero/goal/stringx"
 )
 
-// basic functions
-
-// Equal reports whether two slices are equal: the same length and all
-// elements equal. If the lengths are different, Equal returns false.
-// Otherwise, the elements are compared in increasing index order, and the
-// comparison stops at the first unequal pair.
-// Floating point NaNs are not considered equal.
-//
-// Parameters:
-//   - s1: The first slice to compare
-//   - s2: The second slice to compare
-//
-// Returns:
-//   - bool: true if slices are equal, false otherwise
-//
-// Example:
-//
-//	s1 := []int{1, 2, 3}
-//	s2 := []int{1, 2, 3}
-//	s3 := []int{1, 2, 4}
-//	fmt.Println(slicex.Equal(s1, s2)) // true
-//	fmt.Println(slicex.Equal(s1, s3)) // false
-func Equal[E comparable](s1, s2 []E) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-	for i := range s1 {
-		if s1[i] != s2[i] {
-			return false
-		}
-	}
-	return true
-}
-
-// EqualFunc reports whether two slices are equal using a comparison
-// function on each pair of elements. If the lengths are different,
-// EqualFunc returns false. Otherwise, the elements are compared in
-// increasing index order, and the comparison stops at the first index
-// for which eq returns false.
-//
-// Parameters:
-//   - s1: The first slice to compare
-//   - s2: The second slice to compare
-//   - eq: The comparison function that takes elements from both slices
-//
-// Returns:
-//   - bool: true if slices are equal according to the comparison function
-//
-// Example:
-//
-//	s1 := []int{1, 2, 3}
-//	s2 := []float64{1.0, 2.0, 3.0}
-//	equal := slicex.EqualFunc(s1, s2, func(a int, b float64) bool {
-//	    return float64(a) == b
-//	})
-//	fmt.Println(equal) // true
-func EqualFunc[E1, E2 any](s1 []E1, s2 []E2, eq func(E1, E2) bool) bool {
-	if len(s1) != len(s2) {
-		return false
-	}
-	for i, v1 := range s1 {
-		v2 := s2[i]
-		if !eq(v1, v2) {
-			return false
-		}
-	}
-	return true
-}
-
 // S is a generic slice type that provides additional methods for slice manipulation.
 // It wraps a standard Go slice with enhanced functionality for filtering, mapping,
 // sorting, and other operations while maintaining immutability.
@@ -273,19 +204,30 @@ func (s S[T]) Union(dest []T) S[T] {
 //	intersection := s1.Intersect(s2)
 //	fmt.Println(intersection.To()) // [4 5]
 func (s S[T]) Intersect(dest []T) S[T] {
+	if len(s) == 0 || len(dest) == 0 {
+		return make(S[T], 0)
+	}
+
+	// Create a map for O(1) lookups
+	destMap := make(map[T]struct{}, len(dest))
+	for _, v := range dest {
+		destMap[v] = struct{}{}
+	}
+
+	// Use a map to track seen elements to avoid duplicates
+	seen := make(map[T]struct{})
 	var ret []T
+
 	for _, v := range s {
-		find := false
-		for _, el := range dest {
-			if v == el {
-				find = true
-				break
+		// Check if element exists in dest and hasn't been added yet
+		if _, exists := destMap[v]; exists {
+			if _, alreadyAdded := seen[v]; !alreadyAdded {
+				seen[v] = struct{}{}
+				ret = append(ret, v)
 			}
 		}
-		if find {
-			ret = append(ret, v)
-		}
 	}
+
 	return From(ret)
 }
 
@@ -395,23 +337,26 @@ func (s S[T]) Contain(e T) bool {
 //	result := numbers.Delete(2, 4)
 //	fmt.Println(result.To()) // [1 3 5]
 func (s S[T]) Delete(elem ...T) S[T] {
+	if len(elem) == 0 {
+		return s // Nothing to delete
+	}
+
+	// Create a map for O(1) lookups
+	deleteMap := make(map[T]struct{}, len(elem))
+	for _, v := range elem {
+		deleteMap[v] = struct{}{}
+	}
+
 	var ret []T
 	for _, v := range s {
-		find := false
-		for _, el := range elem {
-			if v == el {
-				find = true
-				break
-			}
-		}
-		if !find {
+		if _, shouldDelete := deleteMap[v]; !shouldDelete {
 			ret = append(ret, v)
 		}
 	}
 	return From(ret)
 }
 
-// Clip removes unused capacity from the slice, returning s[:len(s):len(s)].
+// Clip removes unused capacity from the slice by creating a new slice with capacity equal to length.
 // This can help reduce memory usage by trimming excess capacity.
 // The original slice is not modified.
 //
@@ -425,7 +370,12 @@ func (s S[T]) Delete(elem ...T) S[T] {
 //	clipped := slicex.From(s).Clip()
 //	fmt.Println(len(clipped), cap(clipped)) // 3 3
 func (s S[T]) Clip() S[T] {
-	return s[:len(s):len(s)]
+	if len(s) == 0 {
+		return make(S[T], 0)
+	}
+	result := make(S[T], len(s))
+	copy(result, s)
+	return result
 }
 
 // sortable slice
@@ -491,6 +441,34 @@ func (s SortableSlice[T]) Swap(i, j int) {
 //	})
 //	fmt.Println(sorted.To()) // [1 1 3 4 5]
 func (s S[T]) Sort(less func(x, y T) bool) SortableSlice[T] {
+	// Create a copy of the slice to avoid modifying the original
+	sortedSlice := make(S[T], len(s))
+	copy(sortedSlice, s)
+
+	v := &SortableSlice[T]{sortedSlice, less}
+	sort.Sort(v)
+	return *v
+}
+
+// SortInPlace sorts the slice in place using the provided comparison function.
+// This method modifies the original slice for better performance when memory
+// efficiency is critical and you don't need to preserve the original order.
+//
+// Parameters:
+//   - less: The comparison function that defines the sort order
+//
+// Returns:
+//   - SortableSlice[T]: A sorted slice that can be further manipulated
+//
+// Example:
+//
+//	numbers := slicex.From([]int{3, 1, 4, 1, 5})
+//	sorted := numbers.SortInPlace(func(a, b int) bool {
+//	    return a < b  // Sort in ascending order
+//	})
+//	fmt.Println(sorted.To()) // [1 1 3 4 5]
+//	fmt.Println(numbers.To()) // [1 1 3 4 5] (original is modified!)
+func (s S[T]) SortInPlace(less func(x, y T) bool) SortableSlice[T] {
 	v := &SortableSlice[T]{s, less}
 	sort.Sort(v)
 	return *v

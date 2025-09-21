@@ -1,5 +1,74 @@
 package slicex
 
+// basic functions
+
+// Equal reports whether two slices are equal: the same length and all
+// elements equal. If the lengths are different, Equal returns false.
+// Otherwise, the elements are compared in increasing index order, and the
+// comparison stops at the first unequal pair.
+// Floating point NaNs are not considered equal.
+//
+// Parameters:
+//   - s1: The first slice to compare
+//   - s2: The second slice to compare
+//
+// Returns:
+//   - bool: true if slices are equal, false otherwise
+//
+// Example:
+//
+//	s1 := []int{1, 2, 3}
+//	s2 := []int{1, 2, 3}
+//	s3 := []int{1, 2, 4}
+//	fmt.Println(slicex.Equal(s1, s2)) // true
+//	fmt.Println(slicex.Equal(s1, s3)) // false
+func Equal[E comparable](s1, s2 []E) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i := range s1 {
+		if s1[i] != s2[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// EqualFunc reports whether two slices are equal using a comparison
+// function on each pair of elements. If the lengths are different,
+// EqualFunc returns false. Otherwise, the elements are compared in
+// increasing index order, and the comparison stops at the first index
+// for which eq returns false.
+//
+// Parameters:
+//   - s1: The first slice to compare
+//   - s2: The second slice to compare
+//   - eq: The comparison function that takes elements from both slices
+//
+// Returns:
+//   - bool: true if slices are equal according to the comparison function
+//
+// Example:
+//
+//	s1 := []int{1, 2, 3}
+//	s2 := []float64{1.0, 2.0, 3.0}
+//	equal := slicex.EqualFunc(s1, s2, func(a int, b float64) bool {
+//	    return float64(a) == b
+//	})
+//	fmt.Println(equal) // true
+func EqualFunc[E1, E2 any](s1 []E1, s2 []E2, eq func(E1, E2) bool) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i, v1 := range s1 {
+		v2 := s2[i]
+		if !eq(v1, v2) {
+			return false
+		}
+	}
+	return true
+}
+
 // Each iterates over each element in the slice and applies the given function to it.
 // This function is useful for performing side effects on each element without collecting results.
 //
