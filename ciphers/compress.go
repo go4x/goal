@@ -1,9 +1,12 @@
 // Package ciphers provides data compression functions for converting numbers to compact string representations.
 //
-// This package includes three compression functions:
-//   - C36: Base36 encoding (0-9, A-Z) - case insensitive, uppercase output
-//   - C62: Base62 encoding (0-9, a-z, A-Z) - case sensitive
-//   - C: Full character set encoding (0-9, a-z, A-Z, special chars) - case sensitive
+// This package includes compression and decompression functions:
+//   - Base36/Base36Decode: Base36 encoding/decoding (0-9, A-Z) - 36 chars, case insensitive
+//   - Base62/Base62Decode: Base62 encoding/decoding (0-9, a-z, A-Z) - 62 chars, case sensitive
+//
+// Compression ratio comparison (for 12345):
+//   - Base36: "9IX" (3 chars)
+//   - Base62: "3d7" (3 chars)
 //
 // These functions are useful for:
 //   - URL shortening
@@ -13,9 +16,13 @@
 //
 // Example usage:
 //
-//	compressed := ciphers.C62(12345) // "3d7"
-//	compressed := ciphers.C36(12345)  // "9IX"
-//	compressed := ciphers.C(12345)   // "1D*"
+//	// Encoding
+//	compressed := ciphers.Base36(12345) // "9IX"
+//	compressed := ciphers.Base62(12345) // "3d7"
+//
+//	// Decoding
+//	number, ok := ciphers.Base36Decode("9IX") // 12345, true
+//	number, ok := ciphers.Base62Decode("3d7") // 12345, true
 package ciphers
 
 import "strings"
@@ -23,17 +30,15 @@ import "strings"
 const (
 	base36chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	base62chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	fullchars   = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+-=[]{}|;:'\"<>,./?`~"
 
-	base36len    = len(base36chars)
-	base62len    = len(base62chars)
-	fullcharslen = len(fullchars)
+	base36len = len(base36chars)
+	base62len = len(base62chars)
 )
 
-// C36 converts a uint to a base36 string, only support positive number.
+// Base36 converts a uint to a base36 string, only support positive number.
 // This function is used to compress a large number to a short string which is case insensitive.
 // The result string is uppercase.
-func C36(n uint) string {
+func Base36(n uint) string {
 	if n == 0 {
 		return base36chars[0:1]
 	}
@@ -51,9 +56,31 @@ func C36(n uint) string {
 	return b.String()
 }
 
-// C62 converts a uint to a base62 string, only support positive number.
+// Base36Decode converts a base36 string back to a uint.
+// This function is the inverse of Base36.
+// Returns 0 and false if the input string is invalid.
+// Base36 is case insensitive, so both upper and lower case letters are accepted.
+func Base36Decode(s string) (uint, bool) {
+	if s == "" {
+		return 0, false
+	}
+
+	result := uint(0)
+	for _, char := range s {
+		// Convert to uppercase for case insensitive comparison
+		upperChar := strings.ToUpper(string(char))
+		index := strings.IndexRune(base36chars, []rune(upperChar)[0])
+		if index == -1 {
+			return 0, false
+		}
+		result = result*uint(base36len) + uint(index)
+	}
+	return result, true
+}
+
+// Base62 converts a uint to a base62 string, only support positive number.
 // This function is used to compress a large number to a short string which is case sensitive.
-func C62(n uint) string {
+func Base62(n uint) string {
 	if n == 0 {
 		return base62chars[0:1]
 	}
@@ -70,22 +97,21 @@ func C62(n uint) string {
 	return b.String()
 }
 
-// C converts a uint to a full string, only support positive number.
-// This function is used to compress a large number to a short string which is case sensitive.
-// The result string is case sensitive.
-func C(n uint) string {
-	if n == 0 {
-		return fullchars[0:1]
+// Base62Decode converts a base62 string back to a uint.
+// This function is the inverse of Base62.
+// Returns 0 and false if the input string is invalid.
+func Base62Decode(s string) (uint, bool) {
+	if s == "" {
+		return 0, false
 	}
-	ss := make([]string, 0)
-	for n != 0 {
-		m := n % uint(fullcharslen)
-		ss = append(ss, fullchars[m:m+1])
-		n /= uint(fullcharslen)
+
+	result := uint(0)
+	for _, char := range s {
+		index := strings.IndexRune(base62chars, char)
+		if index == -1 {
+			return 0, false
+		}
+		result = result*uint(base62len) + uint(index)
 	}
-	b := strings.Builder{}
-	for i := len(ss) - 1; i >= 0; i-- {
-		b.WriteString(ss[i])
-	}
-	return b.String()
+	return result, true
 }
