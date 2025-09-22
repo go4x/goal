@@ -1,4 +1,4 @@
-// Package ciphers provides data compression functions for converting numbers to compact string representations.
+// Package base provides data compression functions for converting numbers to compact string representations.
 //
 // This package includes compression and decompression functions:
 //   - Base36/Base36Decode: Base36 encoding/decoding (0-9, A-Z) - 36 chars, case insensitive
@@ -17,13 +17,13 @@
 // Example usage:
 //
 //	// Encoding
-//	compressed := ciphers.Base36(12345) // "9IX"
-//	compressed := ciphers.Base62(12345) // "3d7"
+//	compressed := base.Base36(12345) // "9IX"
+//	compressed := base.Base62(12345) // "3d7"
 //
 //	// Decoding
-//	number, ok := ciphers.Base36Decode("9IX") // 12345, true
-//	number, ok := ciphers.Base62Decode("3d7") // 12345, true
-package ciphers
+//	number, ok := base.Base36Decode("9IX") // 12345, true
+//	number, ok := base.Base62Decode("3d7") // 12345, true
+package base
 
 import "strings"
 

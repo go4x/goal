@@ -1,4 +1,4 @@
-package ciphers
+package base
 
 import (
 	"fmt"
