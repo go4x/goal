@@ -9,7 +9,7 @@ import (
 	"github.com/go4x/got"
 )
 
-func TestC36(t *testing.T) {
+func TestBase36(t *testing.T) {
 	tests := []got.Case{
 		got.NewCase("0", 0, "0", false, nil),
 		got.NewCase("1", 1, "1", false, nil),
@@ -33,7 +33,7 @@ func TestC36(t *testing.T) {
 	})
 }
 
-func TestC36_Random(t *testing.T) {
+func TestBase36_Random(t *testing.T) {
 	m := make(map[string]int)
 	g := got.New(t, "Base36_random")
 	for i := 0; i < 1000000; i++ {
@@ -47,7 +47,7 @@ func TestC36_Random(t *testing.T) {
 	}
 }
 
-func TestC62(t *testing.T) {
+func TestBase62(t *testing.T) {
 	tests := []got.Case{
 		got.NewCase("0", 0, "0", false, nil),
 		got.NewCase("1", 1, "1", false, nil),
@@ -72,7 +72,7 @@ func TestC62(t *testing.T) {
 	})
 }
 
-func TestC62_Random(t *testing.T) {
+func TestBase62_Random(t *testing.T) {
 	m := make(map[string]int)
 	g := got.New(t, "Base62_random")
 	for i := 0; i < 1000000; i++ {
