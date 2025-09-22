@@ -10,24 +10,69 @@ import (
 // Recover is used with defer to do cleanup on panics.
 // Use it like:
 //
-//	defer Recover(func() {})
+//	defer Recover(logger, func() { /* cleanup code */ })
 func Recover(logger logx.Logger, cleanups ...func()) {
-	for _, cleanup := range cleanups {
-		cleanup()
-	}
-
 	if p := recover(); p != nil {
-		logger.Error("Recover", "error", p, "stack", debug.Stack())
+		// Execute cleanup functions when panic occurs
+		for _, cleanup := range cleanups {
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						// Handle panics in cleanup functions
+						if logger != nil {
+							logger.Error("Cleanup", "error", r, "stack", debug.Stack())
+						}
+					}
+				}()
+				cleanup()
+			}()
+		}
+
+		// Log the panic information
+		if logger != nil {
+			logger.Error("Recover", "error", p, "stack", debug.Stack())
+		}
 	}
 }
 
-// RecoverCtx is used with defer to do cleanup on panics.
+// RecoverCtx is used with defer to do cleanup on panics with context support.
+// It respects context cancellation and timeout during cleanup.
 func RecoverCtx(ctx context.Context, logger logx.Logger, cleanups ...func()) {
-	for _, cleanup := range cleanups {
-		cleanup()
-	}
-
 	if p := recover(); p != nil {
-		logger.Error("Recover", "error", p, "stack", debug.Stack())
+		// Check if context is already cancelled
+		select {
+		case <-ctx.Done():
+			if logger != nil {
+				logger.Error("Recover", "error", p, "stack", debug.Stack(),
+					"context_cancelled", ctx.Err())
+			}
+			return
+		default:
+		}
+
+		// Execute cleanup functions with context awareness
+		for _, cleanup := range cleanups {
+			select {
+			case <-ctx.Done():
+				return // Stop cleanup if context is cancelled
+			default:
+				func() {
+					defer func() {
+						if r := recover(); r != nil {
+							// Handle panics in cleanup functions
+							if logger != nil {
+								logger.Error("Cleanup", "error", r, "stack", debug.Stack())
+							}
+						}
+					}()
+					cleanup()
+				}()
+			}
+		}
+
+		// Log the panic information
+		if logger != nil {
+			logger.Error("Recover", "error", p, "stack", debug.Stack())
+		}
 	}
 }
