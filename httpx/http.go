@@ -1,3 +1,4 @@
+// Package httpx provides HTTP client utilities and response wrappers.
 package httpx
 
 import (
@@ -31,6 +32,7 @@ type builder struct {
 }
 
 // R is a wrapper struct for http.Response, providing additional fields for error handling and response body caching.
+// It extends the standard http.Response with error tracking, body caching, and convenient access methods.
 type R struct {
 	*http.Response
 
@@ -51,7 +53,7 @@ func RespErr(r *http.Response, err error) *R {
 
 // ok checks if the response is successful(2xx)
 func (r *R) ok() bool {
-	if !(r.StatusCode >= http.StatusOK && r.StatusCode < http.StatusMultipleChoices) {
+	if r.StatusCode < http.StatusOK || r.StatusCode >= http.StatusMultipleChoices {
 		r.wrapErr(fmt.Errorf("%s", r.Status))
 		return false
 	}
@@ -60,11 +62,11 @@ func (r *R) ok() bool {
 
 // wrapErr wraps the error with the response error
 func (r *R) wrapErr(err error) {
-	e := err
 	if r.err != nil {
-		e = errorx.Wrap(err)
+		r.err = errorx.Wrapf(r.err, "%v", err)
+	} else {
+		r.err = err
 	}
-	r.err = e
 }
 
 // readAll reads the whole body of the response
@@ -78,6 +80,7 @@ func (r *R) readAll() *R {
 				r.read = true
 				r.body = bs
 			}
+			_ = r.Body.Close() // Ensure response body is closed
 		}
 	}
 	return r
@@ -85,8 +88,9 @@ func (r *R) readAll() *R {
 
 // Clone clones the R
 func (r *R) Clone() *R {
-	bodyCopy := make([]byte, len(r.readAll().body))
-	copy(bodyCopy, r.readAll().body)
+	body := r.readAll().body
+	bodyCopy := make([]byte, len(body))
+	copy(bodyCopy, body)
 	nr := RespErr(r.Response, r.err)
 	nr.body = bodyCopy
 	nr.read = true // body has been copied, so set read to true

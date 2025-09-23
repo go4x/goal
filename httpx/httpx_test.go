@@ -62,7 +62,7 @@ func TestHttp_BuilderGet(t *testing.T) {
 	logger := got.New(t, "test send http GET method with builder api")
 	logger.Case("GET html from baidu home page.")
 	httpx.NewBuilder("http://www.baidu.com").Success(func(resp *http.Response) {
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			logger.Fail("should can read response data, but got error: %v", err)
@@ -357,5 +357,5 @@ func TestPostJson(t *testing.T) {
 	url := "http://localhost:1234/json"
 	s, err := httpx.PostJson(url, nil)
 	logger.Require(err == nil, "post request should no error")
-	logger.Require(html == s, "post result with string should be correct")
+	logger.Require(jsonstr == s, "post result with string should be correct")
 }

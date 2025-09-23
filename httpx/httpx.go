@@ -1,3 +1,34 @@
+// Package httpx provides a convenient HTTP client library with builder pattern support.
+// It offers both simple convenience methods and a flexible builder API for making HTTP requests.
+//
+// Key Features:
+//   - Builder pattern for complex requests
+//   - Convenience methods for common operations (GET, POST, etc.)
+//   - JSON marshaling/unmarshaling support
+//   - Response body caching and cloning
+//   - Error handling with panic-based and error-return patterns
+//   - Content type management
+//
+// Basic Usage:
+//
+//	// Simple GET request
+//	body, err := httpx.GetString("https://api.example.com/data")
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	// Builder pattern
+//	httpx.NewBuilder("https://api.example.com/users").
+//		ContentType(httpx.ContentTypeApplicationJson).
+//		Success(func(resp *http.Response) {
+//			// Handle successful response
+//		}).Failed(func(err error) {
+//			// Handle error
+//		}).Post()
+//
+//	// JSON operations
+//	type User struct { Name string `json:"name"` }
+//	user, err := httpx.GetJson("https://api.example.com/user", &User{})
 package httpx
 
 import (
@@ -7,8 +38,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/go4x/goal/errorx"
 )
 
 // Handler is a function that will be called when the request is successful
@@ -106,7 +135,7 @@ func (b *httpBuilder) Request(method string) {
 		return
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		err = errors.New(resp.Status)
 		b.errHandler(err)
 	} else {
@@ -121,7 +150,10 @@ func (b *httpBuilder) Get() {
 	var err error
 	if len(b.headers) > 0 {
 		req, err := http.NewRequest(b.method, b.url, nil)
-		errorx.Throw(err)
+		if err != nil {
+			b.errHandler(err)
+			return
+		}
 		req.Header = b.headers
 		resp, err = b.getClient().Do(req)
 	} else {
@@ -133,7 +165,7 @@ func (b *httpBuilder) Get() {
 		return
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		err = errors.New(resp.Status)
 		b.errHandler(err)
 	} else {
@@ -148,7 +180,10 @@ func (b *httpBuilder) Post() {
 	var err error
 	if len(b.headers) > 0 {
 		req, err := http.NewRequest(b.method, b.url, b.body)
-		errorx.Throw(err)
+		if err != nil {
+			b.errHandler(err)
+			return
+		}
 
 		b.mergeHeaders()
 
@@ -163,7 +198,7 @@ func (b *httpBuilder) Post() {
 		return
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		err = errors.New(resp.Status)
 		b.errHandler(err)
 	} else {
@@ -242,7 +277,7 @@ func getBytes(url string, errHandler ErrHandler, headers ...H) []byte {
 	NewBuilder(url).Success(func(resp *http.Response) {
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			errHandler(fmt.Errorf("read reponse data error: %v", err))
+			errHandler(fmt.Errorf("read response data error: %v", err))
 			return
 		}
 		ret = bytes
@@ -353,9 +388,9 @@ func PostJson(url string, body io.Reader, headers ...H) (string, error) {
 	return r, err
 }
 
-// PostJsonr sends a POST request with a JSON body to the specified URL and returns an *R object
+// PostJsonResp sends a POST request with a JSON body to the specified URL and returns an *R object
 // that wraps the HTTP response and any error encountered during the request.
-func PostJsonr(url string, body io.Reader, headers ...H) *R {
+func PostJsonResp(url string, body io.Reader, headers ...H) *R {
 	var resp *http.Response
 	var err error
 	NewBuilder(url).ContentType(ContentTypeApplicationJson).Body(body).
@@ -404,9 +439,9 @@ func PostForm(url string, body io.Reader, headers ...H) (string, error) {
 	return s, err
 }
 
-// PostFormr sends a POST request with a form-urlencoded body to the specified URL and returns an *R object
+// PostFormResp sends a POST request with a form-urlencoded body to the specified URL and returns an *R object
 // that wraps the HTTP response and any error encountered during the request.
-func PostFormr(url string, body io.Reader, headers ...H) *R {
+func PostFormResp(url string, body io.Reader, headers ...H) *R {
 	var resp *http.Response
 	var err error
 	NewBuilder(url).ContentType(ContentTypeApplicationFormUrlencoded).Body(body).
@@ -433,7 +468,7 @@ func postBytes(url string, ct ContentType, body io.Reader, errHandler ErrHandler
 	NewBuilder(url).ContentType(ct).Body(body).Success(func(resp *http.Response) {
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			errHandler(fmt.Errorf("read reponse data error: %v", err))
+			errHandler(fmt.Errorf("read response data error: %v", err))
 			return
 		}
 		ret = bytes
