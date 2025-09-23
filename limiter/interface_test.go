@@ -5,26 +5,27 @@ import (
 	"time"
 )
 
-// TestTokenBucketImplementsLimiter 验证 TokenBucket 是否实现了 Limiter 接口
+// TestTokenBucketImplementsLimiter verifies that TokenBucket implements the Limiter interface.
+// This test validates the interface implementation at compile time.
 func TestTokenBucketImplementsLimiter(t *testing.T) {
-	// 这个测试会在编译时验证接口实现关系
+	// Compile-time interface implementation check
 	var _ Limiter = &TokenBucket{}
 
-	// 创建实例并测试所有接口方法
+	// Create instance and test all interface methods
 	bucket := NewTokenBucket(10, 5, time.Second)
 
-	// 测试 TryTake
+	// Test TryTake
 	_ = bucket.TryTake()
 
-	// 测试 Take (在 goroutine 中避免阻塞)
+	// Test Take (in goroutine to avoid blocking)
 	go func() {
 		bucket.Take()
 	}()
 
-	// 测试 TakeWithTimeout
+	// Test TakeWithTimeout
 	_ = bucket.TakeWithTimeout(100 * time.Millisecond)
 
-	// 测试 Stat
+	// Test Stat
 	total, blocked, successRate := bucket.Stat()
 	_ = total
 	_ = blocked
@@ -33,12 +34,12 @@ func TestTokenBucketImplementsLimiter(t *testing.T) {
 	t.Log("TokenBucket successfully implements Limiter interface")
 }
 
-// TestLimiterInterface 测试接口的多态性
+// TestLimiterInterface tests interface polymorphism.
 func TestLimiterInterface(t *testing.T) {
-	// 使用接口类型
+	// Use interface type
 	var limiter Limiter = NewTokenBucket(10, 5, time.Second)
 
-	// 测试所有接口方法
+	// Test all interface methods
 	_ = limiter.TryTake()
 	_ = limiter.TakeWithTimeout(100 * time.Millisecond)
 	total, blocked, successRate := limiter.Stat()

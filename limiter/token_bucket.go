@@ -45,7 +45,6 @@ type TokenBucket struct {
 //   - If the bucket is full, new tokens are dropped (bucket doesn't overflow)
 //   - The process can be stopped by sending a signal to the stop channel
 func (l *TokenBucket) Start() {
-	l.RegisterExitHandler()
 	go func() {
 		for {
 			select {
@@ -89,9 +88,18 @@ func (l *TokenBucket) RegisterExitHandler() {
 //
 // After calling Stop(), no new tokens will be generated,
 // but existing tokens in the bucket can still be consumed.
+//
+// This method is safe to call multiple times.
 func (l *TokenBucket) Stop() {
 	l.ticker.Stop()
-	close(l.stop)
+
+	// Use select to avoid closing an already closed channel
+	select {
+	case <-l.stop:
+		// Channel already closed
+	default:
+		close(l.stop)
+	}
 }
 
 // TryTake attempts to acquire a token without blocking.
@@ -216,6 +224,17 @@ func (l *TokenBucket) ResetStat() {
 //	// Method chaining
 //	limiter := NewTokenBucket(100, 10, time.Second).Start()
 func NewTokenBucket(capacity int, rate int, window time.Duration) *TokenBucket {
+	// Handle edge cases
+	if capacity < 0 {
+		capacity = 0
+	}
+	if rate <= 0 {
+		rate = 1 // Minimum rate of 1 to avoid division by zero
+	}
+	if window <= 0 {
+		window = time.Second // Default window
+	}
+
 	return &TokenBucket{
 		tokens: make(chan struct{}, capacity),
 		ticker: time.NewTicker(window / time.Duration(rate)),
