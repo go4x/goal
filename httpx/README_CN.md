@@ -77,7 +77,7 @@ if err != nil {
 defer resp.Close()
 
 // POST JSON 请求
-jsonBody := strings.NewReader(`{"name": "张三", "age": 30}`)
+jsonBody := strings.NewReader(`{"name": "hank", "age": 30}`)
 resp, err = client.PostJson("https://httpbin.org/post", jsonBody)
 if err != nil {
     panic(err)
@@ -345,7 +345,7 @@ type User struct {
     Age  int    `json:"age"`
 }
 
-user := User{Name: "张三", Age: 30}
+user := User{Name: "hank", Age: 30}
 jsonData, _ := json.Marshal(user)
 resp, err := httpx.PostJson("https://api.example.com/users", strings.NewReader(string(jsonData)))
 

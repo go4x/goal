@@ -49,7 +49,7 @@ fmt.Printf("响应: %s\n", body)
 ### POST JSON 请求
 
 ```go
-jsonData := `{"name": "张三", "age": 25}`
+jsonData := `{"name": "hank", "age": 25}`
 body := strings.NewReader(jsonData)
 
 resultChan := client.PostJsonAsync("https://api.example.com/users", body)
@@ -75,7 +75,7 @@ requests := []httpx.AsyncRequest{
     
     // POST JSON 请求 - 自动使用 PostJson
     httpx.NewAsyncRequestWithContentType("POST", "https://api2.example.com/users", nil, 
-        strings.NewReader(`{"name": "张三", "age": 25}`), "application/json"),
+        strings.NewReader(`{"name": "hank", "age": 25}`), "application/json"),
     
     // PUT 表单请求 - 自动使用 PutForm
     httpx.NewAsyncRequestWithContentType("PUT", "https://api3.example.com/users/1", nil,
