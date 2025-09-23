@@ -1,101 +1,395 @@
-package httpx_test
+package httpx
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
-	"net/http"
+	"net/url"
 	"strings"
 	"testing"
-
-	"github.com/go4x/goal/httpx"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestRespEmpty(t *testing.T) {
-	resp := &http.Response{StatusCode: http.StatusOK, Status: "200 ok", Body: http.NoBody}
-	r := httpx.Resp(resp)
-	s := r.Str()
-	assert.True(t, s == "")
-	assert.Nil(t, r.Err())
+func TestPackageLevelMethods(t *testing.T) {
+	// Test Get method
+	t.Run("Get", func(t *testing.T) {
+		params := url.Values{}
+		params.Set("test", "value")
+
+		resp, err := Get("https://httpbin.org/get", params)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+
+	// Test Get without params
+	t.Run("Get without params", func(t *testing.T) {
+		resp, err := Get("https://httpbin.org/get", nil)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
 }
 
-func TestRespStringBody(t *testing.T) {
-	bodystr := "hello, body"
-	sr := strings.NewReader(bodystr)
-	resp := &http.Response{StatusCode: http.StatusOK, Status: "200 ok", Body: io.NopCloser(sr)}
-	r := httpx.Resp(resp)
-	s := r.Str()
-	assert.True(t, s == bodystr)
-	assert.Nil(t, r.Err())
+func TestPackageLevelGetWithBody(t *testing.T) {
+	t.Run("GetWithBody", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"test": "value"}`)
+
+		resp, err := GetWithBody("https://httpbin.org/get", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("GetWithBody with nil body", func(t *testing.T) {
+		resp, err := GetWithBody("https://httpbin.org/get", nil)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
 }
 
-func TestRespObjBody(t *testing.T) {
-	bd := TestBody{F: "field", A: 1024}
-	bs, _ := json.Marshal(&bd)
-	br := bytes.NewReader(bs)
-	resp := &http.Response{StatusCode: http.StatusOK, Status: "200 ok", Body: io.NopCloser(br)}
-	r := httpx.Resp(resp)
-	s := r.Str()
-	fmt.Println(s)
-	assert.True(t, s == string(bs))
-	assert.Nil(t, r.Err())
-	var bdr TestBody
-	obj := r.JsonObj(&bdr).(*TestBody)
-	assert.Equal(t, obj, &bdr)
+func TestPackageLevelGetJson(t *testing.T) {
+	t.Run("GetJson", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"query": "test"}`)
+
+		resp, err := GetJson("https://httpbin.org/get", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
 }
 
-func TestRespSliceBody(t *testing.T) {
-	bds := []TestBody{
-		{F: "field1", A: 1023},
-		{F: "field2", A: 1024},
+func TestPackageLevelGetForm(t *testing.T) {
+	t.Run("GetForm", func(t *testing.T) {
+		formData := url.Values{}
+		formData.Set("field1", "value1")
+		formData.Set("field2", "value2")
+		formBody := strings.NewReader(formData.Encode())
+
+		resp, err := GetForm("https://httpbin.org/get", formBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPost(t *testing.T) {
+	t.Run("Post", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"test": "data"}`)
+
+		resp, err := Post("https://httpbin.org/post", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("Post with nil body", func(t *testing.T) {
+		resp, err := Post("https://httpbin.org/post", nil)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPostJson(t *testing.T) {
+	t.Run("PostJson", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"name": "test", "value": 123}`)
+
+		resp, err := PostJson("https://httpbin.org/post", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPostForm(t *testing.T) {
+	t.Run("PostForm", func(t *testing.T) {
+		formData := url.Values{}
+		formData.Set("name", "test")
+		formData.Set("value", "123")
+		formBody := strings.NewReader(formData.Encode())
+
+		resp, err := PostForm("https://httpbin.org/post", formBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPut(t *testing.T) {
+	t.Run("Put", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"id": 1, "name": "updated"}`)
+
+		resp, err := Put("https://httpbin.org/put", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPutJson(t *testing.T) {
+	t.Run("PutJson", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"id": 1, "name": "updated"}`)
+
+		resp, err := PutJson("https://httpbin.org/put", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPutForm(t *testing.T) {
+	t.Run("PutForm", func(t *testing.T) {
+		formData := url.Values{}
+		formData.Set("id", "1")
+		formData.Set("name", "updated")
+		formBody := strings.NewReader(formData.Encode())
+
+		resp, err := PutForm("https://httpbin.org/put", formBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPatch(t *testing.T) {
+	t.Run("Patch", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"name": "patched"}`)
+
+		resp, err := Patch("https://httpbin.org/patch", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPatchJson(t *testing.T) {
+	t.Run("PatchJson", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"name": "patched"}`)
+
+		resp, err := PatchJson("https://httpbin.org/patch", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelPatchForm(t *testing.T) {
+	t.Run("PatchForm", func(t *testing.T) {
+		formData := url.Values{}
+		formData.Set("name", "patched")
+		formBody := strings.NewReader(formData.Encode())
+
+		resp, err := PatchForm("https://httpbin.org/patch", formBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelDelete(t *testing.T) {
+	t.Run("Delete", func(t *testing.T) {
+		resp, err := Delete("https://httpbin.org/delete")
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelDeleteJson(t *testing.T) {
+	t.Run("DeleteJson", func(t *testing.T) {
+		jsonBody := strings.NewReader(`{"confirmCode": "ABC123"}`)
+
+		resp, err := DeleteJson("https://httpbin.org/delete", jsonBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelDeleteForm(t *testing.T) {
+	t.Run("DeleteForm", func(t *testing.T) {
+		formData := url.Values{}
+		formData.Set("confirmCode", "ABC123")
+		formBody := strings.NewReader(formData.Encode())
+
+		resp, err := DeleteForm("https://httpbin.org/delete", formBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestPackageLevelMethods_EdgeCases(t *testing.T) {
+	t.Run("nil body handling", func(t *testing.T) {
+		resp, err := Post("https://httpbin.org/post", nil)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("empty body handling", func(t *testing.T) {
+		emptyBody := strings.NewReader("")
+		resp, err := Post("https://httpbin.org/post", emptyBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+
+	t.Run("large body handling", func(t *testing.T) {
+		// Create a large JSON body
+		largeData := strings.Repeat(`{"field": "value", "number": 123},`, 1000)
+		largeBody := strings.NewReader(`[` + largeData[:len(largeData)-1] + `]`)
+
+		resp, err := Post("https://httpbin.org/post", largeBody)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
+		defer func() { _ = resp.Close() }()
+
+		if !resp.IsSuccess() {
+			t.Errorf("Expected success response, got status %d", resp.StatusCode)
+		}
+	})
+}
+
+// Benchmark tests for package-level methods
+func BenchmarkPackageLevel_Get(b *testing.B) {
+	params := url.Values{}
+	params.Set("test", "benchmark")
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		resp, err := Get("https://httpbin.org/get", params)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = resp.Close()
 	}
-	bs, _ := json.Marshal(&bds)
-	br := bytes.NewReader(bs)
-	resp := &http.Response{StatusCode: http.StatusOK, Status: "200 ok", Body: io.NopCloser(br)}
-	r := httpx.Resp(resp)
-
-	var bdrs []TestBody
-	ss := r.JsonObj(&bdrs).(*[]TestBody)
-	assert.Equal(t, &bdrs, ss)
-	assert.Nil(t, r.Err())
 }
 
-type TestBody struct {
-	F string `json:"f"`
-	A int32  `json:"a"`
+func BenchmarkPackageLevel_PostJson(b *testing.B) {
+	jsonBody := strings.NewReader(`{"test": "benchmark"}`)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		resp, err := PostJson("https://httpbin.org/post", jsonBody)
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = resp.Close()
+	}
 }
 
-func TestNotSuccess(t *testing.T) {
-	br := bytes.NewReader([]byte("test not found"))
-	resp := &http.Response{Status: "404 Not Found", Body: io.NopCloser(br)}
-	r := httpx.Resp(resp)
-	s := r.Str()
-	assert.True(t, s == "")
-	assert.Equal(t, r.Err().Error(), resp.Status)
-}
-
-func TestWrapErr(t *testing.T) {
-	br := bytes.NewReader([]byte("test not found"))
-	resp := &http.Response{Status: "404 Not Found", Body: io.NopCloser(br)}
-	r := httpx.Resp(resp)
-	s := r.Str()
-	assert.True(t, s == "")
-	err0 := r.Err()
-	assert.Equal(t, err0.Error(), resp.Status)
-	err1 := fmt.Errorf("test error")
-	httpx.WrapErr(r, err1)
-	werr0 := r.Err()
-	err2 := fmt.Errorf("read error")
-	httpx.WrapErr(r, err2)
-	werr1 := r.Err()
-	err3 := fmt.Errorf("json error")
-	httpx.WrapErr(r, err3)
-	werr2 := r.Err()
-	fmt.Println(r.Err())
-	assert.True(t, errors.Is(werr2, err3))
-	assert.True(t, errors.Is(werr1, err2))
-	assert.True(t, errors.Is(werr0, err1))
+func BenchmarkPackageLevel_Delete(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		resp, err := Delete("https://httpbin.org/delete")
+		if err != nil {
+			b.Fatal(err)
+		}
+		_ = resp.Close()
+	}
 }
