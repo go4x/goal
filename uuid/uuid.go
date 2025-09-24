@@ -3,11 +3,10 @@ package uuid
 import (
 	"strings"
 
-	"github.com/go4x/goal/value"
 	"github.com/google/uuid"
 )
 
-// UUID generates a new random UUID and returns it as a standard string format.
+// UUIDSafe generates a new random UUID and returns it as a standard string format.
 // The returned string follows the standard UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 //
 // This function uses the Google UUID library and will panic if UUID generation fails.
@@ -15,10 +14,32 @@ import (
 //
 // Example:
 //
-//	id := uuid.UUID()
+//	id := uuid.UUIDSafe()
 //	fmt.Println(id) // Output: "550e8400-e29b-41d4-a716-446655440000"
-func UUID() string {
-	return value.Must(uuid.NewUUID()).String()
+func UUIDSafe() string {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		panic(err)
+	}
+	return id.String()
+}
+
+// UUID generates a new random UUID and returns it as a standard string format.
+// The returned string follows the standard UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+//
+// This function uses the Google UUID library and will return an error if UUID generation fails.
+// For production use, consider using the Sid struct for distributed ID generation.
+//
+// Example:
+//
+//	id, err := uuid.UUID()
+//	fmt.Println(id) // Output: "550e8400-e29b-41d4-a716-446655440000"
+func UUID() (string, error) {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return "", err
+	}
+	return id.String(), nil
 }
 
 // UUID32 generates a new random UUID and returns it as a 32-character string without hyphens.
@@ -29,6 +50,5 @@ func UUID() string {
 //	id := uuid.UUID32()
 //	fmt.Println(id) // Output: "550e8400e29b41d4a716446655440000"
 func UUID32() string {
-	uid := value.Must(uuid.NewUUID()).String()
-	return strings.ReplaceAll(uid, "-", "")
+	return strings.ReplaceAll(UUIDSafe(), "-", "")
 }

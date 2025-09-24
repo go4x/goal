@@ -121,7 +121,11 @@ func BenchmarkSid_GenUint64(b *testing.B) {
 // Test UUID functions
 func TestUUID(t *testing.T) {
 	// Test that UUID generates a valid UUID format
-	uuid := UUID()
+	uuid, err := UUID()
+	if err != nil {
+		t.Errorf("UUID() error = %v", err)
+		return
+	}
 
 	// UUID should be 36 characters long (32 hex chars + 4 hyphens)
 	if len(uuid) != 36 {
@@ -135,7 +139,11 @@ func TestUUID(t *testing.T) {
 	}
 
 	// Test that multiple calls generate different UUIDs
-	uuid2 := UUID()
+	uuid2, err := UUID()
+	if err != nil {
+		t.Errorf("UUID() error = %v", err)
+		return
+	}
 	if uuid == uuid2 {
 		t.Error("UUID() returned the same UUID twice")
 	}
@@ -184,7 +192,10 @@ func TestUUID32Consistency(t *testing.T) {
 // Benchmark UUID functions
 func BenchmarkUUID(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		UUID()
+		_, err := UUID()
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 

@@ -11,7 +11,10 @@ import (
 // ExampleUUID demonstrates basic UUID generation
 func ExampleUUID() {
 	// Generate a standard UUID
-	id := uuid.UUID()
+	id, err := uuid.UUID()
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Printf("Standard UUID: %s\n", id)
 	// Output: Standard UUID: 550e8400-e29b-41d4-a716-446655440000
 }
