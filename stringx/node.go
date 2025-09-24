@@ -1,17 +1,22 @@
 package stringx
 
+// node represents a node in the Aho-Corasick automaton.
+// It's used for efficient string matching and replacement operations.
 type node struct {
-	children map[rune]*node
-	fail     *node
-	depth    int
-	end      bool
+	children map[rune]*node // Child nodes indexed by rune
+	fail     *node          // Failure link for Aho-Corasick algorithm
+	depth    int            // Depth of the node in the trie
+	end      bool           // Whether this node represents the end of a word
 }
 
+// scope represents a matched substring with start and stop positions.
 type scope struct {
-	start int
-	stop  int
+	start int // Start position of the match
+	stop  int // End position of the match
 }
 
+// add adds a word to the trie structure.
+// Creates nodes as needed and marks the final node as an end node.
 func (n *node) add(word string) {
 	chars := []rune(word)
 	if len(chars) == 0 {
@@ -38,6 +43,8 @@ func (n *node) add(word string) {
 	nd.end = true
 }
 
+// build constructs the failure links for the Aho-Corasick automaton.
+// This enables efficient pattern matching by precomputing failure transitions.
 func (n *node) build() {
 	var nodes []*node
 	for _, child := range n.children {
@@ -65,6 +72,8 @@ func (n *node) build() {
 	}
 }
 
+// find searches for all patterns in the input text using the Aho-Corasick algorithm.
+// Returns a slice of scopes representing all matched substrings.
 func (n *node) find(chars []rune) []scope {
 	var scopes []scope
 	size := len(chars)

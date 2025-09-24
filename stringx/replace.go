@@ -5,23 +5,27 @@ import (
 	"strings"
 )
 
-// replace more than once to avoid overlapped keywords after replace.
-// only try 2 times to avoid too many or infinite loops.
+// replaceTimes is the maximum number of replacement iterations.
+// Replace more than once to avoid overlapped keywords after replace.
+// Only try 2 times to avoid too many or infinite loops.
 const replaceTimes = 2
 
 type (
-	// Replacer interface wraps the Replace method.
+	// Replacer interface wraps the Replace method for string replacement operations.
 	Replacer interface {
 		Replace(text string) string
 	}
 
+	// replacer implements the Replacer interface using Aho-Corasick algorithm.
+	// It provides efficient multi-pattern string replacement.
 	replacer struct {
 		*node
-		mapping map[string]string
+		mapping map[string]string // Maps patterns to their replacements
 	}
 )
 
-// NewReplacer returns a Replacer.
+// NewReplacer creates a new Replacer with the given pattern-to-replacement mapping.
+// The replacer uses the Aho-Corasick algorithm for efficient multi-pattern matching.
 func NewReplacer(mapping map[string]string) Replacer {
 	rep := &replacer{
 		node:    new(node),
@@ -35,7 +39,8 @@ func NewReplacer(mapping map[string]string) Replacer {
 	return rep
 }
 
-// Replace replaces text with given substitutes.
+// Replace performs string replacement using the configured patterns.
+// It iterates up to replaceTimes to handle overlapping patterns.
 func (r *replacer) Replace(text string) string {
 	for i := 0; i < replaceTimes; i++ {
 		var replaced bool
@@ -47,6 +52,8 @@ func (r *replacer) Replace(text string) string {
 	return text
 }
 
+// doReplace performs a single replacement pass on the text.
+// Returns the modified text and a boolean indicating if any replacements were made.
 func (r *replacer) doReplace(text string) (string, bool) {
 	chars := []rune(text)
 	scopes := r.find(chars)
@@ -54,6 +61,7 @@ func (r *replacer) doReplace(text string) (string, bool) {
 		return text, false
 	}
 
+	// Sort scopes by start position, with longer matches taking precedence for same start
 	sort.Slice(scopes, func(i, j int) bool {
 		if scopes[i].start < scopes[j].start {
 			return true

@@ -1,5 +1,7 @@
 package stringx
 
+// Common string constants used throughout the stringx package.
+// These constants provide commonly used string literals for better code readability and maintainability.
 const (
 	Ampersand       = "&"
 	And             = "and"
@@ -9,7 +11,7 @@ const (
 	Star            = Asterisk
 	Backslash       = "\\"
 	Colon           = ":"
-	comma           = ","
+	Comma           = ","
 	Dash            = "-"
 	Dollar          = "$"
 	Dot             = "."
@@ -51,4 +53,122 @@ const (
 	Yes             = "yes"
 	In              = "in"
 	Crlf            = "\r\n"
+
+	// Additional punctuation and symbols
+	Exclamation     = "!"
+	AtSign          = "@"
+	HashTag         = "#"
+	DollarSign      = "$"
+	PercentSign     = "%"
+	Caret           = "^"
+	AmpersandSign   = "&"
+	StarSign        = "*"
+	PlusSign        = "+"
+	MinusSign       = "-"
+	EqualsSign      = "="
+	UnderscoreSign  = "_"
+	PipeSign        = "|"
+	BackslashSign   = "\\"
+	ForwardSlash    = "/"
+	ColonSign       = ":"
+	SemicolonSign   = ";"
+	CommaSign       = ","
+	DotSign         = "."
+	QuestionSign    = "?"
+	ExclamationSign = "!"
+
+	// Bracket pairs (additional)
+	LeftParen  = "("
+	RightParen = ")"
+	LeftAngle  = "<"
+	RightAngle = ">"
+
+	// Quote types (additional)
+	DoubleQuote   = "\""
+	BacktickQuote = "`"
+
+	// Whitespace characters
+	SpaceChar      = " "
+	TabChar        = "\t"
+	NewlineChar    = "\n"
+	CarriageReturn = "\r"
+	FormFeed       = "\f"
+	VerticalTab    = "\v"
+
+	// Common separators
+	CommaSpace     = ", "
+	SemicolonSpace = "; "
+	ColonSpace     = ": "
+	PipeSpace      = " | "
+	SlashSpace     = " / "
+	BackslashSpace = " \\ "
+
+	// Common boolean values
+	BooleanTrue     = "true"
+	BooleanFalse    = "false"
+	BooleanYes      = "yes"
+	BooleanNo       = "no"
+	BooleanOn       = "on"
+	BooleanOff      = "off"
+	BooleanEnabled  = "enabled"
+	BooleanDisabled = "disabled"
+
+	// Common null/empty values
+	NullValue      = "null"
+	UndefinedValue = "undefined"
+	EmptyString    = ""
+	ZeroValue      = "0"
+	OneValue       = "1"
+
+	// Common file extensions
+	ExtJSON   = ".json"
+	ExtXML    = ".xml"
+	ExtHTML   = ".html"
+	ExtCSS    = ".css"
+	ExtJS     = ".js"
+	ExtGo     = ".go"
+	ExtTxt    = ".txt"
+	ExtLog    = ".log"
+	ExtYAML   = ".yaml"
+	ExtYML    = ".yml"
+	ExtTOML   = ".toml"
+	ExtINI    = ".ini"
+	ExtConf   = ".conf"
+	ExtConfig = ".config"
+
+	// Common protocols
+	ProtocolHTTP            = "http"
+	ProtocolHTTPS           = "https"
+	ProtocolFTP             = "ftp"
+	ProtocolFTPS            = "ftps"
+	ProtocolSFTP            = "sftp"
+	ProtocolSSH             = "ssh"
+	ProtocolTCP             = "tcp"
+	ProtocolUDP             = "udp"
+	ProtocolWebSocket       = "ws"
+	ProtocolWebSocketSecure = "wss"
+
+	// Common encoding types
+	EncodingUTF8   = "utf-8"
+	EncodingUTF16  = "utf-16"
+	EncodingASCII  = "ascii"
+	EncodingBase64 = "base64"
+	EncodingHex    = "hex"
+	EncodingURL    = "url"
+
+	// Common time zones
+	TimezoneUTC = "UTC"
+	TimezoneGMT = "GMT"
+	TimezoneEST = "EST"
+	TimezonePST = "PST"
+	TimezoneCST = "CST"
+	TimezoneMST = "MST"
+
+	// Common units
+	UnitBytes = "bytes"
+	UnitKB    = "KB"
+	UnitMB    = "MB"
+	UnitGB    = "GB"
+	UnitTB    = "TB"
+	UnitPB    = "PB"
 )
