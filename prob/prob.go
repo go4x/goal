@@ -1,14 +1,30 @@
 package prob
 
 import (
+	"crypto/rand"
+	"encoding/binary"
 	"errors"
 	"math"
-	"math/rand"
+	mathrand "math/rand"
 	"time"
 )
 
+// getSecureSeed generates a cryptographically secure seed
+func getSecureSeed() int64 {
+	// Try to use crypto/rand for better security
+	b := make([]byte, 8)
+	_, err := rand.Read(b)
+	if err == nil {
+		return int64(binary.BigEndian.Uint64(b))
+	}
+
+	// Fallback to time-based seed if crypto/rand fails
+	return time.Now().UnixNano()
+}
+
 // Global random number generator for better performance
-var globalRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+// Using crypto/rand for better seed generation
+var globalRand = mathrand.New(mathrand.NewSource(getSecureSeed()))
 
 // Percent calculates the percentage probability.
 // Returns true if the random number is less than or equal to the given percentage.

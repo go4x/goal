@@ -26,7 +26,7 @@ func BenchmarkSelect(b *testing.B) {
 	weights := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Select(weights)
+		_, _ = Select(weights)
 	}
 }
 
@@ -34,7 +34,7 @@ func BenchmarkSelectFloat(b *testing.B) {
 	weights := []float64{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		SelectFloat(weights)
+		_, _ = SelectFloat(weights)
 	}
 }
 
@@ -56,7 +56,7 @@ func BenchmarkSelectWeighted(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		SelectWeighted(choices)
+		_, _ = SelectWeighted(choices)
 	}
 }
 
@@ -70,7 +70,7 @@ func BenchmarkSelectWeightedFloat(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		SelectWeightedFloat(choices)
+		_, _ = SelectWeightedFloat(choices)
 	}
 }
 
@@ -153,7 +153,7 @@ func BenchmarkWeightedSample(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		WeightedSample(slice, weights, 10)
+		_, _ = WeightedSample(slice, weights, 10)
 	}
 }
 
@@ -176,7 +176,7 @@ func BenchmarkSelectAlloc(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Select(weights)
+		_, _ = Select(weights)
 	}
 }
 
@@ -191,7 +191,7 @@ func BenchmarkSelectWeightedAlloc(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		SelectWeighted(choices)
+		_, _ = SelectWeighted(choices)
 	}
 }
 
@@ -227,7 +227,7 @@ func BenchmarkSelectLarge(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Select(weights)
+		_, _ = Select(weights)
 	}
 }
 
@@ -238,7 +238,7 @@ func BenchmarkSelectFloatLarge(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		SelectFloat(weights)
+		_, _ = SelectFloat(weights)
 	}
 }
 
