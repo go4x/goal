@@ -69,7 +69,7 @@ func (s Sid) GenString() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to generate sonyflake ID: %w", err)
 	}
-	return intToBase62(int(id)), nil
+	return uint64ToBase62(id), nil
 }
 
 // GenUint64 generates a new unique ID and returns it as a raw uint64.
@@ -87,27 +87,21 @@ func (s Sid) GenUint64() (uint64, error) {
 	return s.sf.NextID()
 }
 
-// intToBase62 converts an integer to base62 string representation.
+// uint64ToBase62 converts a uint64 to base62 string representation.
 // Base62 uses characters: 0-9, a-z, A-Z (62 characters total).
 // This provides a more compact string representation than base10.
 //
 // Example:
 //
-//	intToBase62(0)    // returns "0"
-//	intToBase62(61)   // returns "Z"
-//	intToBase62(62)   // returns "10"
-//	intToBase62(123)  // returns "1Z"
-func intToBase62(n int) string {
+//	uint64ToBase62(0)    // returns "0"
+//	uint64ToBase62(61)   // returns "Z"
+//	uint64ToBase62(62)   // returns "10"
+//	uint64ToBase62(123)  // returns "1Z"
+func uint64ToBase62(n uint64) string {
 	const base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	if n == 0 {
 		return string(base62[0])
-	}
-
-	// Handle negative numbers
-	negative := n < 0
-	if negative {
-		n = -n
 	}
 
 	var result []byte
@@ -119,10 +113,6 @@ func intToBase62(n int) string {
 	// Reverse the string
 	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
 		result[i], result[j] = result[j], result[i]
-	}
-
-	if negative {
-		return "-" + string(result)
 	}
 
 	return string(result)

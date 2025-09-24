@@ -5,10 +5,10 @@ import (
 	"testing"
 )
 
-func TestIntToBase62(t *testing.T) {
+func TestUint64ToBase62(t *testing.T) {
 	tests := []struct {
 		name string
-		n    int
+		n    uint64
 		want string
 	}{
 		{name: "zero", n: 0, want: "0"},
@@ -22,15 +22,14 @@ func TestIntToBase62(t *testing.T) {
 		{name: "one hundred twenty-three", n: 123, want: "1Z"},
 		{name: "three thousand eight hundred forty-three", n: 3843, want: "ZZ"},
 		{name: "two hundred thirty-eight thousand three hundred twenty-eight", n: 238328, want: "1000"},
-		{name: "negative number", n: -1, want: "-1"},
-		{name: "negative ten", n: -10, want: "-a"},
+		{name: "large number", n: 18446744073709551615, want: "LygHa16ahYG"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := intToBase62(tt.n)
+			got := uint64ToBase62(tt.n)
 			if got != tt.want {
-				t.Errorf("intToBase62(%d) = %v, want %v", tt.n, got, tt.want)
+				t.Errorf("uint64ToBase62(%d) = %v, want %v", tt.n, got, tt.want)
 			}
 		})
 	}
@@ -89,9 +88,9 @@ func TestSid_GenUint64(t *testing.T) {
 }
 
 // Benchmark tests
-func BenchmarkIntToBase62(b *testing.B) {
+func BenchmarkUint64ToBase62(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		intToBase62(123456789)
+		uint64ToBase62(123456789)
 	}
 }
 
@@ -192,5 +191,122 @@ func BenchmarkUUID(b *testing.B) {
 func BenchmarkUUID32(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		UUID32()
+	}
+}
+
+// Additional tests for edge cases
+func TestSid_GenString_Uniqueness(t *testing.T) {
+	sid := NewSid()
+	generated := make(map[string]bool)
+	count := 1000
+
+	for i := 0; i < count; i++ {
+		id, err := sid.GenString()
+		if err != nil {
+			t.Errorf("GenString() error = %v", err)
+			return
+		}
+		if generated[id] {
+			t.Errorf("GenString() generated duplicate: %s", id)
+		}
+		generated[id] = true
+	}
+
+	if len(generated) != count {
+		t.Errorf("Expected %d unique IDs, got %d", count, len(generated))
+	}
+}
+
+func TestSid_GenUint64_Uniqueness(t *testing.T) {
+	sid := NewSid()
+	generated := make(map[uint64]bool)
+	count := 1000
+
+	for i := 0; i < count; i++ {
+		id, err := sid.GenUint64()
+		if err != nil {
+			t.Errorf("GenUint64() error = %v", err)
+			return
+		}
+		if generated[id] {
+			t.Errorf("GenUint64() generated duplicate: %d", id)
+		}
+		generated[id] = true
+	}
+
+	if len(generated) != count {
+		t.Errorf("Expected %d unique IDs, got %d", count, len(generated))
+	}
+}
+
+func TestSid_GenString_Concurrent(t *testing.T) {
+	sid := NewSid()
+	results := make(chan string, 100)
+	errors := make(chan error, 100)
+
+	// Generate IDs concurrently
+	for i := 0; i < 100; i++ {
+		go func() {
+			id, err := sid.GenString()
+			if err != nil {
+				errors <- err
+				return
+			}
+			results <- id
+		}()
+	}
+
+	// Collect results
+	generated := make(map[string]bool)
+	for i := 0; i < 100; i++ {
+		select {
+		case id := <-results:
+			if generated[id] {
+				t.Errorf("Concurrent GenString() generated duplicate: %s", id)
+			}
+			generated[id] = true
+		case err := <-errors:
+			t.Errorf("Concurrent GenString() error = %v", err)
+		}
+	}
+
+	if len(generated) != 100 {
+		t.Errorf("Expected 100 unique IDs, got %d", len(generated))
+	}
+}
+
+func TestSid_GenUint64_Concurrent(t *testing.T) {
+	sid := NewSid()
+	results := make(chan uint64, 100)
+	errors := make(chan error, 100)
+
+	// Generate IDs concurrently
+	for i := 0; i < 100; i++ {
+		go func() {
+			id, err := sid.GenUint64()
+			if err != nil {
+				errors <- err
+				return
+			}
+			results <- id
+		}()
+	}
+
+	// Collect results
+	generated := make(map[uint64]bool)
+	for i := 0; i < 100; i++ {
+		select {
+		case id := <-results:
+			if generated[id] {
+				t.Errorf("Concurrent GenUint64() generated duplicate: %d", id)
+			}
+			generated[id] = true
+		case err := <-errors:
+			t.Errorf("Concurrent GenUint64() error = %v", err)
+		}
+	}
+
+	if len(generated) != 100 {
+		t.Errorf("Expected 100 unique IDs, got %d", len(generated))
 	}
 }

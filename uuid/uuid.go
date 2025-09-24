@@ -3,7 +3,7 @@ package uuid
 import (
 	"strings"
 
-	"github.com/go4x/goal/valuex"
+	"github.com/go4x/goal/value"
 	"github.com/google/uuid"
 )
 
@@ -18,7 +18,7 @@ import (
 //	id := uuid.UUID()
 //	fmt.Println(id) // Output: "550e8400-e29b-41d4-a716-446655440000"
 func UUID() string {
-	return valuex.Must(uuid.NewUUID()).String()
+	return value.Must(uuid.NewUUID()).String()
 }
 
 // UUID32 generates a new random UUID and returns it as a 32-character string without hyphens.
@@ -29,6 +29,6 @@ func UUID() string {
 //	id := uuid.UUID32()
 //	fmt.Println(id) // Output: "550e8400e29b41d4a716446655440000"
 func UUID32() string {
-	uid := valuex.Must(uuid.NewUUID()).String()
+	uid := value.Must(uuid.NewUUID()).String()
 	return strings.ReplaceAll(uid, "-", "")
 }
