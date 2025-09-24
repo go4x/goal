@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// DefInterval is the default interval strategy that uses exponential backoff
-var DefInterval = &defaultInterval{}
+// defInterval is the default interval strategy that uses exponential backoff
+var defInterval = &defaultInterval{}
 
 // F is the function type to be retried.
 // It returns two values:
@@ -45,6 +45,15 @@ type constantInterval struct {
 // Interval sleeps for the constant interval duration
 func (s *constantInterval) Interval(n uint) {
 	time.Sleep(s.interval)
+}
+
+// DefaultInterval returns the default interval strategy.
+// It implements exponential backoff strategy.
+// It sleeps for 2^n seconds between retry attempts (1s, 2s, 4s, 8s, ...).
+//
+// If no interval strategy is set, is will be used as default.
+func DefaultInterval() Intervaler {
+	return defInterval
 }
 
 // ConstantInterval creates a constant interval strategy.
@@ -149,7 +158,7 @@ func Do(f F, pf ...settings) error {
 	var n uint
 	var err error
 	var stop bool
-	p.interval = DefInterval
+	p.interval = defInterval
 	for _, fn := range pf {
 		fn(&p)
 	}
