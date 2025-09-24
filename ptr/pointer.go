@@ -4,14 +4,25 @@ import (
 	"reflect"
 )
 
+// To converts a value to a pointer.
 func To[T any](v T) *T {
 	return &v
 }
 
+// From converts a pointer to a value.
 func From[T any](v *T) T {
 	return *v
 }
 
+// FromDef converts a pointer to a value, or returns a default value if nil.
+func FromDef[T any](v *T, defaultValue T) T {
+	if v == nil {
+		return defaultValue
+	}
+	return *v
+}
+
+// ToSlice converts a slice of values to a slice of pointers.
 func ToSlice[T any](v []T) []*T {
 	var ret []*T
 	for _, v := range v {
@@ -20,6 +31,7 @@ func ToSlice[T any](v []T) []*T {
 	return ret
 }
 
+// FromSlice converts a slice of pointers to a slice of values.
 func FromSlice[T any](v []*T) []T {
 	var ret []T
 	for _, v := range v {
