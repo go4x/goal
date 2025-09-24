@@ -2,6 +2,7 @@ package retry
 
 import (
 	"errors"
+	"math/rand"
 	"time"
 )
 
@@ -26,14 +27,17 @@ type Intervaler interface {
 	Interval(n uint)
 }
 
-// defaultInterval implements exponential backoff strategy.
-// It sleeps for 2^n seconds between retry attempts (1s, 2s, 4s, 8s, ...).
+// defaultInterval implements exponential backoff strategy with jitter.
+// It sleeps for 2^n seconds plus random jitter between retry attempts.
 type defaultInterval struct {
 }
 
-// Interval implements exponential backoff: sleep for 2^n seconds
+// Interval implements exponential backoff with jitter: sleep for 2^n seconds with random jitter
 func (s *defaultInterval) Interval(n uint) {
-	time.Sleep(time.Second * (1 << n))
+	base := time.Second * (1 << n)
+	// Add jitter: random value between 0 and base/2
+	jitter := time.Duration(rand.Int63n(int64(base / 2)))
+	time.Sleep(base + jitter)
 }
 
 // constantInterval implements a constant interval strategy.
@@ -48,10 +52,10 @@ func (s *constantInterval) Interval(n uint) {
 }
 
 // DefaultInterval returns the default interval strategy.
-// It implements exponential backoff strategy.
-// It sleeps for 2^n seconds between retry attempts (1s, 2s, 4s, 8s, ...).
+// It implements exponential backoff strategy with jitter.
+// It sleeps for 2^n seconds plus random jitter between retry attempts.
 //
-// If no interval strategy is set, is will be used as default.
+// If no interval strategy is set, it will be used as default.
 func DefaultInterval() Intervaler {
 	return defInterval
 }
@@ -70,6 +74,51 @@ func DefaultInterval() Intervaler {
 //	retry.Interval(retry.ConstantInterval(100 * time.Millisecond))
 func ConstantInterval(interval time.Duration) Intervaler {
 	return &constantInterval{interval: interval}
+}
+
+// jitterInterval implements exponential backoff with configurable jitter.
+// It provides more control over jitter behavior than the default strategy.
+type jitterInterval struct {
+	base   time.Duration
+	jitter float64 // jitter factor (0.0 to 1.0)
+}
+
+// Interval implements exponential backoff with configurable jitter
+func (j *jitterInterval) Interval(n uint) {
+	base := j.base * time.Duration(1<<n)
+	jitterAmount := float64(base) * j.jitter
+	jitter := time.Duration(rand.Float64() * jitterAmount)
+	time.Sleep(base + jitter)
+}
+
+// ExponentialBackoffWithJitter creates an exponential backoff strategy with configurable jitter.
+// This provides more control over jitter behavior than the default strategy.
+//
+// Parameters:
+//   - base: Base duration for the first retry
+//   - jitter: Jitter factor (0.0 to 1.0), where 0.0 = no jitter, 1.0 = 100% jitter
+//
+// Returns:
+//   - Intervaler: A strategy that uses exponential backoff with jitter
+//
+// Example:
+//
+//	// 10% jitter
+//	retry.Interval(retry.ExponentialBackoffWithJitter(time.Second, 0.1))
+//
+//	// 50% jitter
+//	retry.Interval(retry.ExponentialBackoffWithJitter(time.Second, 0.5))
+func ExponentialBackoffWithJitter(base time.Duration, jitter float64) Intervaler {
+	if jitter < 0 {
+		jitter = 0
+	}
+	if jitter > 1 {
+		jitter = 1
+	}
+	return &jitterInterval{
+		base:   base,
+		jitter: jitter,
+	}
 }
 
 // setting holds the configuration for retry behavior
@@ -163,7 +212,7 @@ func Do(f F, pf ...settings) error {
 		fn(&p)
 	}
 	if p.times == 0 {
-		return errors.New("retry times not be set")
+		return errors.New("retry times not set")
 	}
 	for {
 		if stop, err = f(); err == nil || stop {

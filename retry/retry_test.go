@@ -120,8 +120,8 @@ func TestRetryTimesNotSet(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for missing times setting")
 	}
-	if err.Error() != "retry times not be set" {
-		t.Errorf("Expected 'times not be set' error, got: %v", err)
+	if err.Error() != "retry times not set" {
+		t.Errorf("Expected 'times not set' error, got: %v", err)
 	}
 }
 
@@ -140,5 +140,69 @@ func TestRetryImmediateSuccess(t *testing.T) {
 	}
 	if attempts != 1 {
 		t.Errorf("Expected 1 attempt, got %d", attempts)
+	}
+}
+
+// TestJitterInterval tests the jitter interval functionality
+func TestJitterInterval(t *testing.T) {
+	attempts := 0
+
+	f := retry.F(func() (bool, error) {
+		attempts++
+		if attempts < 2 {
+			return false, errors.New("temporary error")
+		}
+		return true, nil
+	})
+
+	// Test with jitter interval
+	start := time.Now()
+	err := retry.Do(f,
+		retry.Times(3),
+		retry.Interval(retry.ExponentialBackoffWithJitter(100*time.Millisecond, 0.5)),
+	)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
+	}
+	if attempts != 2 {
+		t.Errorf("Expected 2 attempts, got %d", attempts)
+	}
+	// Should have slept for at least 100ms (base time)
+	if elapsed < 100*time.Millisecond {
+		t.Errorf("Expected at least 100ms elapsed, got %v", elapsed)
+	}
+}
+
+// TestJitterIntervalNoJitter tests jitter interval with 0% jitter
+func TestJitterIntervalNoJitter(t *testing.T) {
+	attempts := 0
+
+	f := retry.F(func() (bool, error) {
+		attempts++
+		if attempts < 2 {
+			return false, errors.New("temporary error")
+		}
+		return true, nil
+	})
+
+	// Test with no jitter (0%)
+	start := time.Now()
+	err := retry.Do(f,
+		retry.Times(3),
+		retry.Interval(retry.ExponentialBackoffWithJitter(50*time.Millisecond, 0.0)),
+	)
+	elapsed := time.Since(start)
+
+	if err != nil {
+		t.Errorf("Expected success, got error: %v", err)
+	}
+	if attempts != 2 {
+		t.Errorf("Expected 2 attempts, got %d", attempts)
+	}
+	// Should be close to 50ms (base time) with minimal jitter
+	if elapsed < 50*time.Millisecond || elapsed > 60*time.Millisecond {
+		t.Errorf("Expected around 50ms elapsed, got %v", elapsed)
 	}
 }
