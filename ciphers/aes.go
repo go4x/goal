@@ -40,9 +40,11 @@ type AESMode int
 
 const (
 	// ECB mode: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#ECB
+	//
 	// WARNING: ECB mode has serious security vulnerabilities and should NOT be used for production.
 	// ECB mode is vulnerable to pattern analysis attacks and does not provide semantic security.
-	// See: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption/20946#20946
+	// See: https://crypto.stackexchange.com/questions/20941/why-shouldnt-i-use-ecb-encryption/20946#20946.
+	//
 	// Use CBC mode with a random IV instead.
 	ECB AESMode = iota
 	// CBC mode: https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#CBC
