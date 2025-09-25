@@ -3,7 +3,7 @@ module github.com/go4x/goal
 go 1.24.0
 
 require (
-	github.com/go4x/got v0.0.0-20250921135508-0e5e892f3719
+	github.com/go4x/got v1.0.0
 	github.com/google/uuid v1.6.0
 	github.com/shopspring/decimal v1.4.0
 	github.com/sony/sonyflake v1.3.0
