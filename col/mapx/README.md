@@ -1,237 +1,439 @@
-# MapX Package - Map Implementations Comparison
+# mapx
 
-This package provides three different map implementations, each optimized for different use cases.
+A comprehensive generic map implementation package for Go that provides multiple map implementations optimized for different use cases.
 
-## 📊 Quick Comparison Table
+## Features
 
-| Feature | **M** (Regular) | **ArrayMap** | **LinkedMap** |
-|---------|----------------|--------------|---------------|
-| **Implementation** | Go built-in map | Two parallel slices | Doubly linked list + hash map |
-| **Insertion Order** | ❌ Not guaranteed | ✅ Guaranteed | ✅ Guaranteed |
-| **Get Operation** | O(1) | O(n) | O(1) |
-| **Put Operation** | O(1) | O(1) new / O(n) existing | O(1) |
-| **Delete Operation** | O(1) | O(n) | O(1) |
-| **Memory Overhead** | Low | Very Low | Medium |
-| **Cache Performance** | Good | Excellent (small data) | Good |
-| **Special Features** | None | First/Last | MoveToEnd/MoveToFront |
-| **Best For** | General use | Small datasets | Large datasets |
+- **Multiple Map Implementations**: Regular Map, ArrayMap, and LinkedMap
+- **Generic Type Support**: Works with any comparable key type and any value type
+- **Polymorphic Interface**: Unified `Map[K, V]` interface for all implementations
+- **Performance Optimized**: Different implementations for different performance requirements
+- **Order Preservation**: ArrayMap and LinkedMap maintain insertion order
+- **Memory Efficient**: Optimized memory usage for different scenarios
 
-## 🎯 Detailed Analysis
-
-### M (Regular Map)
-**Based on Go's built-in map**
-
-#### ✅ Advantages:
-- **Fastest performance**: O(1) for all operations
-- **Lowest memory overhead**: Uses Go's optimized built-in map
-- **Battle-tested**: Based on Go's standard library
-- **No pointer chasing**: Excellent cache performance
-- **Simple**: Easy to understand and debug
-
-#### ❌ Disadvantages:
-- **No order guarantee**: Iteration order is random
-- **No special features**: Basic map operations only
-
-#### 🎯 Use Cases:
-- General-purpose mappings where order doesn't matter
-- Performance-critical applications
-- Large datasets where you don't need order
-- When you need the fastest possible performance
-
-#### 📈 Performance Characteristics:
-```
-Dataset Size: Any
-Get: O(1)
-Put: O(1)
-Delete: O(1)
-Memory: O(n)
-```
-
-### ArrayMap
-**Based on two parallel slices**
-
-#### ✅ Advantages:
-- **Simple implementation**: Easy to understand and debug
-- **Minimal memory overhead**: Just two slices, no pointers
-- **Cache-friendly**: Sequential memory access for small datasets
-- **Deterministic order**: Always maintains insertion order
-- **Memory efficient**: No extra metadata or pointers
-
-#### ❌ Disadvantages:
-- **O(n) operations**: Linear search for Get/Delete
-- **Poor scaling**: Performance degrades with size
-- **No O(1) operations**: Except appending new keys
-
-#### 🎯 Use Cases:
-- Small to medium datasets (< 1000 elements)
-- Configuration maps where order matters
-- Prototyping or simple applications
-- Memory-constrained environments
-- When you rarely access elements (mostly iteration)
-
-#### 📈 Performance Characteristics:
-```
-Dataset Size: < 1000 elements
-Get: O(n) - linear search
-Put: O(1) new / O(n) existing
-Delete: O(n)
-Memory: O(n) - minimal overhead
-```
-
-### LinkedMap
-**Based on doubly linked list + hash map**
-
-#### ✅ Advantages:
-- **O(1) operations**: Fast Get, Put, Delete operations
-- **Order guaranteed**: Maintains insertion order
-- **Scalable**: Good performance for large datasets
-- **Advanced features**: MoveToEnd, MoveToFront for LRU caches
-- **Efficient deletions**: O(1) node removal
-
-#### ❌ Disadvantages:
-- **Higher memory overhead**: Pointers + hash map overhead
-- **Complex implementation**: More code to maintain
-- **Pointer chasing**: Potential cache misses
-- **Overhead for small datasets**: Hash map overhead
-
-#### 🎯 Use Cases:
-- Large datasets (> 1000 elements)
-- Frequent lookups, insertions, or deletions
-- LRU cache implementations
-- Performance-critical applications requiring order
-- When you need both O(1) operations and order
-
-#### 📈 Performance Characteristics:
-```
-Dataset Size: > 1000 elements
-Get: O(1) - hash map lookup
-Put: O(1) - hash map + linked list
-Delete: O(1) - hash map + linked list
-Memory: O(n) - hash map + node pointers
-```
-
-## 🤔 Decision Guide
-
-### Choose **M** when:
-- You need the fastest possible performance
-- Order doesn't matter
-- You're working with large datasets
-- You want the simplest solution
-
-### Choose **ArrayMap** when:
-- You need insertion order
-- Dataset is small (< 1000 elements)
-- You have memory constraints
-- You rarely access elements (mostly iteration)
-- You want a simple, predictable implementation
-
-### Choose **LinkedMap** when:
-- You need insertion order AND performance
-- Dataset is large (> 1000 elements)
-- You need frequent lookups/deletions
-- You're building an LRU cache
-- You need advanced features like MoveToEnd
-
-## 🔄 Polymorphic Usage
-
-All three implementations implement the `Map[K, V]` interface, allowing for polymorphic usage:
-
-```go
-// Factory function
-func createMap(mapType string) mapx.Map[string, int] {
-    switch mapType {
-    case "regular":
-        return mapx.New[string, int]()
-    case "array":
-        return mapx.NewArrayMap[string, int]()
-    case "linked":
-        return mapx.NewLinkedMap[string, int]()
-    default:
-        return mapx.New[string, int]()
-    }
-}
-
-// Use polymorphically
-var maps []mapx.Map[string, int]
-maps = append(maps, mapx.New[string, int]())
-maps = append(maps, mapx.NewArrayMap[string, int]())
-maps = append(maps, mapx.NewLinkedMap[string, int]())
-
-for _, m := range maps {
-    m.Put("key", 42)    // Same interface
-    fmt.Println(m.Size()) // Same behavior
-}
-```
-
-## 📝 Examples
-
-### Basic Usage
-```go
-// Regular map
-regular := mapx.New[string, int]()
-regular.Put("a", 1).Put("b", 2)
-
-// Array map (ordered)
-array := mapx.NewArrayMap[string, int]()
-array.Put("a", 1).Put("b", 2)
-// Keys() returns ["a", "b"] in insertion order
-
-// Linked map (ordered + fast)
-linked := mapx.NewLinkedMap[string, int]()
-linked.Put("a", 1).Put("b", 2)
-// Keys() returns ["a", "b"] in insertion order
-```
-
-### LRU Cache Implementation
-```go
-type LRUCache struct {
-    capacity int
-    cache    *mapx.LinkedMap[string, int]
-}
-
-func (lru *LRUCache) Get(key string) (int, bool) {
-    if val, ok := lru.cache.Get(key); ok {
-        // Move to end (most recently used)
-        lru.cache.MoveToEnd(key)
-        return val, true
-    }
-    return 0, false
-}
-
-func (lru *LRUCache) Put(key string, value int) {
-    if lru.cache.Contains(key) {
-        lru.cache.Put(key, value)
-        lru.cache.MoveToEnd(key)
-    } else {
-        if lru.cache.Size() >= lru.capacity {
-            // Remove least recently used (first element)
-            if k, _, ok := lru.cache.First(); ok {
-                lru.cache.Del(k)
-            }
-        }
-        lru.cache.Put(key, value)
-    }
-}
-```
-
-## ⚡ Performance Tips
-
-1. **For small datasets (< 100 elements)**: ArrayMap might actually be faster than LinkedMap due to cache locality
-2. **For large datasets (> 1000 elements)**: LinkedMap is significantly faster than ArrayMap
-3. **For memory-constrained environments**: Use ArrayMap
-4. **For maximum performance**: Use M (regular map) if order doesn't matter
-5. **For LRU caches**: LinkedMap is the clear winner with MoveToEnd/MoveToFront
-
-## 🧪 Testing
-
-All implementations are thoroughly tested with 99.4% coverage. Run tests with:
+## Installation
 
 ```bash
-go test ./col/mapx -v -cover
+go get github.com/go4x/goal/col/mapx
 ```
 
-## 📚 See Also
+## Quick Start
 
-- `array_map_test.go` - ArrayMap tests and examples
-- `linked_map_test.go` - LinkedMap tests and examples  
-- `interface_example_test.go` - Polymorphic usage examples
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/go4x/goal/col/mapx"
+)
+
+func main() {
+    // Create a map (defaults to regular map)
+    myMap := mapx.New[string, int]()
+    myMap.Put("apple", 1).Put("banana", 2).Put("apple", 3) // Overwrites "apple"
+    
+    fmt.Println(myMap.Size()) // Output: 2
+    fmt.Println(myMap.Get("apple")) // Output: 3 true
+    
+    // Get all entries
+    entries := myMap.Entries()
+    fmt.Println(entries) // Output: [apple:3 banana:2] (order may vary)
+}
+```
+
+## Map Implementations
+
+### 1. Regular Map (Default)
+
+**Best for**: General-purpose map operations, performance-critical applications
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Create a regular map
+regularMap := mapx.New[string, int]()
+regularMap.Put("first", 1).Put("second", 2).Put("first", 3) // Overwrites
+
+// O(1) operations
+fmt.Println(regularMap.Get("first")) // 3 true
+regularMap.Remove("second")
+fmt.Println(regularMap.Size()) // 1
+```
+
+**Characteristics:**
+- ⚡ **Fastest performance**: O(1) average-case for all operations
+- 🔀 **No order guarantee**: Entries may appear in any order
+- 💾 **Memory efficient**: Uses Go's built-in map internally
+- 🎯 **Best for**: Large datasets, performance-critical code
+
+### 2. ArrayMap
+
+**Best for**: Small datasets, when insertion order matters
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Create an ArrayMap
+arrayMap := mapx.NewArrayMap[string, int]()
+arrayMap.Put("first", 1).Put("second", 2).Put("third", 3)
+
+// Maintains insertion order
+entries := arrayMap.Entries()
+fmt.Println(entries) // Output: [first:1 second:2 third:3]
+```
+
+**Characteristics:**
+- 📋 **Maintains order**: Entries appear in insertion order
+- 🐌 **O(n) operations**: Linear time complexity
+- 💾 **Memory efficient**: Good for small datasets
+- 🎯 **Best for**: Small datasets (< 1000 entries), when order matters
+
+### 3. LinkedMap
+
+**Best for**: Large datasets requiring order, LRU cache implementations
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Create a LinkedMap
+linkedMap := mapx.NewLinkedMap[string, int]()
+linkedMap.Put("first", 1).Put("second", 2).Put("third", 3)
+
+// O(1) operations with order
+fmt.Println(linkedMap.Get("first")) // 1 true
+entries := linkedMap.Entries()
+fmt.Println(entries) // Output: [first:1 second:2 third:3]
+
+// LRU cache operations
+linkedMapTyped := linkedMap.(*mapx.LinkedMap[string, int])
+linkedMapTyped.MoveToEnd("first") // Move to end (most recently used)
+linkedMapTyped.MoveToFront("second") // Move to front
+```
+
+**Characteristics:**
+- ⚡ **O(1) performance**: Fast operations with order
+- 📋 **Maintains order**: Entries appear in insertion order
+- 🔄 **LRU support**: MoveToEnd/MoveToFront operations
+- 🎯 **Best for**: Large datasets, LRU caches, when you need both speed and order
+
+## Decision Guide
+
+| Use Case | Recommended Implementation | Reason |
+|----------|---------------------------|--------|
+| General-purpose, don't care about order | `New[K, V]()` | Fastest O(1) operations |
+| Small dataset (< 1000), need order | `NewArrayMap[K, V]()` | Simple, memory efficient |
+| Large dataset, need order | `NewLinkedMap[K, V]()` | O(1) operations with order |
+| Building LRU cache | `NewLinkedMap[K, V]()` | Built-in LRU operations |
+| Default choice | `New[K, V]()` | Best general-purpose option |
+
+## Common Operations
+
+### Basic Operations
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Create a map
+myMap := mapx.New[string, int]()
+
+// Put entries
+myMap.Put("apple", 1).Put("banana", 2).Put("cherry", 3)
+
+// Check if empty
+fmt.Println(myMap.IsEmpty()) // false
+
+// Get size
+fmt.Println(myMap.Size()) // 3
+
+// Get value
+value, exists := myMap.Get("apple")
+fmt.Println(value, exists) // 1 true
+
+// Check if key exists
+fmt.Println(myMap.Contains("banana")) // true
+fmt.Println(myMap.Contains("grape")) // false
+
+// Remove entry
+myMap.Remove("banana")
+fmt.Println(myMap.Contains("banana")) // false
+
+// Get all entries
+entries := myMap.Entries()
+fmt.Println(entries) // [apple:1 cherry:3] (order may vary for regular map)
+
+// Clear all entries
+myMap.Clear()
+fmt.Println(myMap.IsEmpty()) // true
+```
+
+### Chaining Operations
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Method chaining for fluent API
+myMap := mapx.New[string, int]().
+    Put("apple", 1).
+    Put("banana", 2).
+    Put("cherry", 3).
+    Remove("banana")
+
+fmt.Println(myMap.Entries()) // [apple:1 cherry:3]
+```
+
+### Type Safety
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Works with any comparable key type and any value type
+stringIntMap := mapx.New[string, int]()
+intStringMap := mapx.New[int, string]()
+structMap := mapx.New[MyKey, MyValue]()
+
+type MyKey struct {
+    ID   int
+    Name string
+}
+
+type MyValue struct {
+    Data string
+    Flag bool
+}
+
+// Custom types must be comparable for keys
+structMap.Put(MyKey{ID: 1, Name: "test"}, MyValue{Data: "value", Flag: true})
+```
+
+## Performance Characteristics
+
+### Time Complexity
+
+| Operation | Regular Map | ArrayMap | LinkedMap |
+|-----------|-------------|----------|-----------|
+| Put | O(1) avg | O(n) if exists, O(1) if new | O(1) avg |
+| Get | O(1) avg | O(n) | O(1) avg |
+| Remove | O(1) avg | O(n) | O(1) avg |
+| Contains | O(1) avg | O(n) | O(1) avg |
+| Size/IsEmpty | O(1) | O(1) | O(1) |
+| Entries | O(n) | O(n) | O(n) |
+| MoveToEnd | N/A | N/A | O(1) |
+| MoveToFront | N/A | N/A | O(1) |
+
+### Memory Usage
+
+- **Regular Map**: Most memory efficient for large datasets
+- **ArrayMap**: Good for small datasets, linear memory growth
+- **LinkedMap**: Slightly more memory overhead due to linked structure
+
+### Performance Recommendations
+
+1. **Use Regular Map** when:
+   - Order doesn't matter
+   - You need maximum performance
+   - Working with large datasets
+
+2. **Use ArrayMap** when:
+   - Dataset is small (< 1000 entries)
+   - Order is important
+   - Memory usage is a concern
+
+3. **Use LinkedMap** when:
+   - You need both O(1) performance and order
+   - Building LRU caches
+   - Large datasets with order requirements
+
+## Thread Safety
+
+⚠️ **Important**: All map implementations are **NOT thread-safe**. If you need concurrent access, you must use synchronization primitives:
+
+```go
+import (
+    "sync"
+    "github.com/go4x/goal/col/mapx"
+)
+
+type SafeMap[K comparable, V any] struct {
+    mu sync.RWMutex
+    m  mapx.Map[K, V]
+}
+
+func (s *SafeMap[K, V]) Put(key K, value V) {
+    s.mu.Lock()
+    defer s.mu.Unlock()
+    s.m.Put(key, value)
+}
+
+func (s *SafeMap[K, V]) Get(key K) (V, bool) {
+    s.mu.RLock()
+    defer s.mu.RUnlock()
+    return s.m.Get(key)
+}
+```
+
+## API Reference
+
+### Map Interface
+
+```go
+type Map[K comparable, V any] interface {
+    Put(key K, value V) Map[K, V]     // Put key-value pair
+    Get(key K) (V, bool)              // Get value by key
+    Remove(key K) Map[K, V]            // Remove key
+    Size() int                         // Get number of entries
+    IsEmpty() bool                     // Check if empty
+    Contains(key K) bool              // Check if key exists
+    Clear() Map[K, V]                  // Remove all entries
+    Entries() []Entry[K, V]            // Get all entries
+}
+```
+
+### Entry Type
+
+```go
+type Entry[K comparable, V any] struct {
+    Key   K
+    Value V
+}
+```
+
+### Constructors
+
+| Function | Description | Use Case |
+|----------|-------------|----------|
+| `New[K, V]()` | Creates regular map (default) | General purpose |
+| `NewArrayMap[K, V]()` | Creates ArrayMap | Small datasets, order needed |
+| `NewLinkedMap[K, V]()` | Creates LinkedMap | Large datasets, order needed |
+
+### LinkedMap Specific Methods
+
+| Method | Description |
+|--------|-------------|
+| `MoveToEnd(key K)` | Move entry to end (most recently used) |
+| `MoveToFront(key K)` | Move entry to front (least recently used) |
+
+## Use Cases
+
+### 1. Configuration Management
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Configuration with order
+type Config struct {
+    settings *mapx.LinkedMap[string, interface{}]
+}
+
+func NewConfig() *Config {
+    return &Config{
+        settings: mapx.NewLinkedMap[string, interface{}]().(*mapx.LinkedMap[string, interface{}]),
+    }
+}
+
+func (c *Config) Set(key string, value interface{}) {
+    c.settings.Put(key, value)
+}
+
+func (c *Config) Get(key string) (interface{}, bool) {
+    return c.settings.Get(key)
+}
+
+func (c *Config) GetAll() []mapx.Entry[string, interface{}] {
+    return c.settings.Entries() // Returns in insertion order
+}
+```
+
+### 2. Session Management
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Session store with LRU eviction
+type SessionStore struct {
+    maxSize int
+    sessions *mapx.LinkedMap[string, Session]
+}
+
+type Session struct {
+    UserID string
+    Data   map[string]interface{}
+}
+
+func NewSessionStore(maxSize int) *SessionStore {
+    return &SessionStore{
+        maxSize: maxSize,
+        sessions: mapx.NewLinkedMap[string, Session]().(*mapx.LinkedMap[string, Session]),
+    }
+}
+
+func (s *SessionStore) Get(sessionID string) (Session, bool) {
+    if session, exists := s.sessions.Get(sessionID); exists {
+        s.sessions.MoveToEnd(sessionID) // Mark as recently used
+        return session, true
+    }
+    return Session{}, false
+}
+
+func (s *SessionStore) Put(sessionID string, session Session) {
+    if s.sessions.Contains(sessionID) {
+        s.sessions.Put(sessionID, session)
+        s.sessions.MoveToEnd(sessionID)
+    } else {
+        if s.sessions.Size() >= s.maxSize {
+            // Remove least recently used
+            entries := s.sessions.Entries()
+            if len(entries) > 0 {
+                s.sessions.Remove(entries[0].Key)
+            }
+        }
+        s.sessions.Put(sessionID, session)
+    }
+}
+```
+
+### 3. Cache Implementation
+
+```go
+import "github.com/go4x/goal/col/mapx"
+
+// Simple cache with LRU eviction
+type Cache struct {
+    maxSize int
+    items   *mapx.LinkedMap[string, interface{}]
+}
+
+func NewCache(maxSize int) *Cache {
+    return &Cache{
+        maxSize: maxSize,
+        items:   mapx.NewLinkedMap[string, interface{}]().(*mapx.LinkedMap[string, interface{}]),
+    }
+}
+
+func (c *Cache) Get(key string) (interface{}, bool) {
+    if value, exists := c.items.Get(key); exists {
+        c.items.MoveToEnd(key) // Mark as recently used
+        return value, true
+    }
+    return nil, false
+}
+
+func (c *Cache) Put(key string, value interface{}) {
+    if c.items.Contains(key) {
+        c.items.Put(key, value)
+        c.items.MoveToEnd(key)
+    } else {
+        if c.items.Size() >= c.maxSize {
+            // Remove least recently used
+            entries := c.items.Entries()
+            if len(entries) > 0 {
+                c.items.Remove(entries[0].Key)
+            }
+        }
+        c.items.Put(key, value)
+    }
+}
+```
+
+## License
+
+This package is part of the goal project and follows the same license terms.
