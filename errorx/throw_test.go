@@ -186,7 +186,7 @@ func BenchmarkThrow(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		func() {
-			defer func() { recover() }()
+			defer func() { _ = recover() }()
 			Throw(err)
 		}()
 	}
@@ -198,7 +198,7 @@ func BenchmarkThrowf(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		func() {
-			defer func() { recover() }()
+			defer func() { _ = recover() }()
 			Throwf(err, "error: %s", err.Error())
 		}()
 	}
@@ -211,7 +211,7 @@ func BenchmarkThrowv(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		func() {
-			defer func() { recover() }()
+			defer func() { _ = recover() }()
 			Throwv(value, err)
 		}()
 	}

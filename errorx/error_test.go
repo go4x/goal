@@ -43,7 +43,7 @@ func TestPreferredError(t *testing.T) {
 	t.Run("create PreferredError with SetCode", func(t *testing.T) {
 		originalErr := errors.New("test error")
 		preferredErr := &PreferredError{error: originalErr}
-		preferredErr.SetCode(http.StatusBadRequest)
+		_ = preferredErr.SetCode(http.StatusBadRequest)
 
 		assert.Equal(t, http.StatusBadRequest, preferredErr.Code())
 		assert.Equal(t, "test error", preferredErr.Error())

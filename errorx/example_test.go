@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go4x/goal/errorx"
-	"github.com/go4x/logx"
 )
 
 // ExamplePreferredError demonstrates how to create and use PreferredError
@@ -108,12 +107,11 @@ func ExampleChainExecutor_DoWithResult() {
 
 // ExampleRecover demonstrates how to use Recover for panic recovery
 func ExampleRecover() {
-	// Mock logger (you would use your actual logger here)
-	var logger logx.Logger
-
 	// Simulate a function that might panic
 	func() {
-		defer errorx.Recover(logger, func() {
+		defer errorx.Recover(func(r any) {
+			fmt.Println(r)
+		}, func() {
 			fmt.Println("Cleanup: closing resources")
 		})
 
@@ -131,12 +129,11 @@ func ExampleRecoverCtx() {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
-	// Mock logger (you would use your actual logger here)
-	var logger logx.Logger
-
 	// Simulate a function that might panic
 	func() {
-		defer errorx.RecoverCtx(ctx, logger, func() {
+		defer errorx.RecoverCtx(ctx, func(r any) {
+			fmt.Println(r)
+		}, func() {
 			fmt.Println("Cleanup: releasing resources")
 		})
 

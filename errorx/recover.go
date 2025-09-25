@@ -2,16 +2,13 @@ package errorx
 
 import (
 	"context"
-	"runtime/debug"
-
-	"github.com/go4x/logx"
 )
 
 // Recover is used with defer to do cleanup on panics.
 // Use it like:
 //
-//	defer Recover(logger, func() { /* cleanup code */ })
-func Recover(logger logx.Logger, cleanups ...func()) {
+//	defer Recover(func(r any) { fmt.Println(r) }, func() { /* cleanup code */ })
+func Recover(f func(r any), cleanups ...func()) {
 	if p := recover(); p != nil {
 		// Execute cleanup functions when panic occurs
 		for _, cleanup := range cleanups {
@@ -19,8 +16,8 @@ func Recover(logger logx.Logger, cleanups ...func()) {
 				defer func() {
 					if r := recover(); r != nil {
 						// Handle panics in cleanup functions
-						if logger != nil {
-							logger.Error("Cleanup", "error", r, "stack", debug.Stack())
+						if f != nil {
+							f(r)
 						}
 					}
 				}()
@@ -28,23 +25,22 @@ func Recover(logger logx.Logger, cleanups ...func()) {
 			}()
 		}
 
-		// Log the panic information
-		if logger != nil {
-			logger.Error("Recover", "error", p, "stack", debug.Stack())
+		// callback to handle the panic information
+		if f != nil {
+			f(p)
 		}
 	}
 }
 
 // RecoverCtx is used with defer to do cleanup on panics with context support.
 // It respects context cancellation and timeout during cleanup.
-func RecoverCtx(ctx context.Context, logger logx.Logger, cleanups ...func()) {
+func RecoverCtx(ctx context.Context, f func(r any), cleanups ...func()) {
 	if p := recover(); p != nil {
 		// Check if context is already cancelled
 		select {
 		case <-ctx.Done():
-			if logger != nil {
-				logger.Error("Recover", "error", p, "stack", debug.Stack(),
-					"context_cancelled", ctx.Err())
+			if f != nil {
+				f(p)
 			}
 			return
 		default:
@@ -60,8 +56,8 @@ func RecoverCtx(ctx context.Context, logger logx.Logger, cleanups ...func()) {
 					defer func() {
 						if r := recover(); r != nil {
 							// Handle panics in cleanup functions
-							if logger != nil {
-								logger.Error("Cleanup", "error", r, "stack", debug.Stack())
+							if f != nil {
+								f(r)
 							}
 						}
 					}()
@@ -70,9 +66,9 @@ func RecoverCtx(ctx context.Context, logger logx.Logger, cleanups ...func()) {
 			}
 		}
 
-		// Log the panic information
-		if logger != nil {
-			logger.Error("Recover", "error", p, "stack", debug.Stack())
+		// callback to handle the panic information
+		if f != nil {
+			f(p)
 		}
 	}
 }
