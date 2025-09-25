@@ -367,7 +367,7 @@ See the `example_test.go` file for detailed usage examples of all functions.
 
 ## License
 
-MIT License
+This package is part of the goal project and follows the same license terms.
 
 ## Contributing
 

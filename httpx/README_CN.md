@@ -1,7 +1,7 @@
 # HTTPX - Go 语言高级 HTTP 客户端库
 
-[![Go 版本](https://img.shields.io/badge/go-%3E%3D1.21-blue.svg)](https://golang.org/)
-[![许可证](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Go 版本](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org/)
+[![许可证](https://img.shields.io/badge/license-apache2.0-green.svg)](LICENSE)
 [![覆盖率](https://img.shields.io/badge/coverage-92.1%25-brightgreen.svg)](coverage.out)
 
 HTTPX 是一个功能全面的 Go 语言 HTTP 客户端库，提供同步和异步 HTTP 请求功能。它提供了清晰、直观的 API，具有智能方法选择、全面的错误处理和广泛的定制选项。
@@ -459,7 +459,7 @@ go test -bench=. ./httpx
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+本项目采用 Apache License 2.0 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
 ## 致谢
 

@@ -1,9 +1,5 @@
 # HTTPX - Advanced HTTP Client Library for Go
 
-[![Go Version](https://img.shields.io/badge/go-%3E%3D1.21-blue.svg)](https://golang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Coverage](https://img.shields.io/badge/coverage-92.1%25-brightgreen.svg)](coverage.out)
-
 HTTPX is a comprehensive HTTP client library for Go that provides both synchronous and asynchronous HTTP request capabilities. It offers a clean, intuitive API with intelligent method selection, comprehensive error handling, and extensive customization options.
 
 ## Features
@@ -459,7 +455,7 @@ go test -bench=. ./httpx
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 

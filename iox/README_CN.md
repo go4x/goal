@@ -1,9 +1,5 @@
 # IOx - 文件和目录操作包
 
-[![Go 版本](https://img.shields.io/badge/go-%3E%3D1.19-blue.svg)](https://golang.org/)
-[![许可证](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![测试覆盖率](https://img.shields.io/badge/coverage-61.4%25-orange.svg)](TEST_COVERAGE_SUMMARY.md)
-
 IOx 是一个功能全面的 Go 包，提供便捷的文件和目录操作工具。它既提供基础功能，也包含高级特性，如支持复杂过滤器组合的灵活文件遍历。
 
 ## 特性
@@ -519,7 +515,7 @@ go test -run TestWalkDir ./iox
 
 ## 许可证
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件。
+本项目采用 Apache License 2.0 - 详见 [LICENSE](LICENSE) 文件。
 
 ## 更新日志
 
@@ -531,15 +527,3 @@ go test -run TestWalkDir ./iox
 - 全面的测试套件
 - 性能基准测试
 - 完整文档
-
-## 支持
-
-如有问题、疑问或贡献：
-
-- **问题**: [GitHub Issues](https://github.com/go4x/goal/issues)
-- **讨论**: [GitHub Discussions](https://github.com/go4x/goal/discussions)
-- **文档**: [包文档](https://pkg.go.dev/github.com/go4x/goal/iox)
-
----
-
-使用 Go 和 ❤️ 制作

@@ -1,9 +1,5 @@
 # IOx - File and Directory Operations Package
 
-[![Go Version](https://img.shields.io/badge/go-%3E%3D1.19-blue.svg)](https://golang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Test Coverage](https://img.shields.io/badge/coverage-61.4%25-orange.svg)](TEST_COVERAGE_SUMMARY.md)
-
 IOx is a comprehensive Go package that provides convenient utilities for file and directory operations. It offers both basic functionality and advanced features like flexible file walking with complex filter combinations.
 
 ## Features
@@ -519,7 +515,7 @@ Key performance metrics:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Changelog
 
@@ -531,15 +527,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Comprehensive test suite
 - Performance benchmarks
 - Complete documentation
-
-## Support
-
-For questions, issues, or contributions:
-
-- **Issues**: [GitHub Issues](https://github.com/go4x/goal/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/go4x/goal/discussions)
-- **Documentation**: [Package Documentation](https://pkg.go.dev/github.com/go4x/goal/iox)
-
----
-
-Made with ❤️ using Go

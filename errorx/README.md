@@ -1,9 +1,5 @@
 # ErrorX - Enhanced Error Handling for Go
 
-[![Go Version](https://img.shields.io/badge/go-1.18+-blue.svg)](https://golang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/your-org/errorx)](https://goreportcard.com/report/github.com/your-org/errorx)
-
 ErrorX is a comprehensive error handling package for Go that provides enhanced error management utilities, particularly useful for web applications and APIs that need to handle HTTP status codes and centralized error processing.
 
 ## Features
@@ -18,7 +14,7 @@ ErrorX is a comprehensive error handling package for Go that provides enhanced e
 ## Installation
 
 ```bash
-go get github.com/hank/workspace/opensource/go-projects/goal/errorx
+go get github.com/go4x/goal/errorx
 ```
 
 ## Quick Start
@@ -30,7 +26,7 @@ package main
 
 import (
     "fmt"
-    "github.com/hank/workspace/opensource/go-projects/goal/errorx"
+    "github.com/go4x/goal/errorx"
 )
 
 func main() {
@@ -50,7 +46,7 @@ package main
 
 import (
     "fmt"
-    "github.com/hank/workspace/opensource/go-projects/goal/errorx"
+    "github.com/go4x/goal/errorx"
 )
 
 func main() {
@@ -76,7 +72,7 @@ package main
 
 import (
     "github.com/go4x/logx"
-    "github.com/hank/workspace/opensource/go-projects/goal/errorx"
+    "github.com/go4x/goal/errorx"
 )
 
 func main() {
@@ -101,7 +97,7 @@ import (
     "time"
     
     "github.com/go4x/logx"
-    "github.com/hank/workspace/opensource/go-projects/goal/errorx"
+    "github.com/go4x/goal/errorx"
 )
 
 func main() {
@@ -339,7 +335,7 @@ See the `example_test.go` file for comprehensive usage examples.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
 
 ## Changelog
 

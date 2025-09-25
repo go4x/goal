@@ -517,7 +517,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This package is part of the goal project and follows the same license terms.
 
 ## Acknowledgments
 
