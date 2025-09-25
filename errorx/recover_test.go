@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/go4x/goal/errorx"
-	"github.com/go4x/goal/tests"
 	"github.com/go4x/logx"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,7 +27,7 @@ func TestRescue(t *testing.T) {
 func TestRescueCtx(t *testing.T) {
 	var count int32
 	assert.NotPanics(t, func() {
-		defer errorx.RecoverCtx(context.Background(), tests.NewLog(), func() {
+		defer errorx.RecoverCtx(context.Background(), nil, func() {
 			atomic.AddInt32(&count, 2)
 		}, func() {
 			atomic.AddInt32(&count, 3)
