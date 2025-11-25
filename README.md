@@ -70,7 +70,6 @@ A comprehensive Go utility library that provides a rich set of packages for comm
 
 | Package | Description | Features |
 |---------|-------------|----------|
-| [`mathx`](./mathx/) | Mathematical utilities | Advanced math operations, calculations |
 | [`prob`](./prob/) | Probability functions | Statistical operations, probability calculations |
 | [`random`](./random/) | Random generation | Number generation, string generation |
 
@@ -264,7 +263,6 @@ goal/
 ├── iox/             # I/O utilities
 ├── jsonx/           # JSON utilities
 ├── limiter/         # Rate limiting
-├── mathx/           # Mathematical utilities
 ├── printer/         # Printing utilities
 ├── prob/            # Probability functions
 ├── ptr/             # Pointer utilities
