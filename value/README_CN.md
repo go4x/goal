@@ -5,7 +5,7 @@
 ## 功能特性
 
 - **泛型类型支持**：支持任何可比较类型
-- **空值处理**：全面的 nil、空值和零值检查
+- **空值处理**：nil 和空值的安全操作
 - **条件逻辑**：函数式条件操作方法
 - **安全操作**：具有适当错误处理的 panic 安全操作
 - **指针操作**：安全的解引用和指针操作
@@ -31,11 +31,6 @@ import (
 func main() {
     // 条件逻辑
     result := value.IfElse(age >= 18, "adult", "minor")
-    
-    // 空值检查
-    if value.IsNotEmpty(data) {
-        fmt.Println("数据不为空")
-    }
     
     // 安全操作
     safeValue := value.Must(strconv.Atoi("123"))
@@ -153,63 +148,6 @@ number := value.Coalesce(p1, p2, p3)
 fmt.Println(number) // 42
 ```
 
-### 空值检查
-
-#### IsZero/IsNotZero - 零值检查
-
-```go
-import "github.com/go4x/goal/value"
-
-// 检查零值
-fmt.Println(value.IsZero(0))        // true
-fmt.Println(value.IsZero(""))      // true
-fmt.Println(value.IsZero(false))  // true
-fmt.Println(value.IsZero(42))     // false
-fmt.Println(value.IsZero("hello")) // false
-
-// 检查非零值
-fmt.Println(value.IsNotZero(42))     // true
-fmt.Println(value.IsNotZero("hello")) // true
-fmt.Println(value.IsNotZero(0))      // false
-```
-
-#### IsNil/IsNotNil - Nil 检查
-
-```go
-import "github.com/go4x/goal/value"
-
-var ptr *int
-fmt.Println(value.IsNil(ptr))        // true
-fmt.Println(value.IsNil(nil))       // true
-fmt.Println(value.IsNil([]int{}))   // false (空切片不是 nil)
-fmt.Println(value.IsNil((*int)(nil))) // true
-
-// 检查非 nil 值
-ptr = &42
-fmt.Println(value.IsNotNil(ptr))     // true
-fmt.Println(value.IsNotNil([]int{})) // true (空切片不是 nil)
-fmt.Println(value.IsNotNil(nil))     // false
-```
-
-#### IsEmpty/IsNotEmpty - 空值检查
-
-```go
-import "github.com/go4x/goal/value"
-
-// 检查空值
-fmt.Println(value.IsEmpty(""))                    // true
-fmt.Println(value.IsEmpty([]int{}))              // true
-fmt.Println(value.IsEmpty(map[string]int{}))     // true
-fmt.Println(value.IsEmpty(0))                   // true
-fmt.Println(value.IsEmpty("hello"))              // false
-fmt.Println(value.IsEmpty([]int{1, 2}))         // false
-
-// 检查非空值
-fmt.Println(value.IsNotEmpty("hello"))           // true
-fmt.Println(value.IsNotEmpty([]int{1, 2}))      // true
-fmt.Println(value.IsNotEmpty(""))                // false
-```
-
 ### 安全操作
 
 #### Must - 错误时 Panic
@@ -286,50 +224,6 @@ result = value.Def("hello", "default")
 fmt.Println(result) // "hello"
 ```
 
-### 比较操作
-
-#### Equal/NotEqual - 值比较
-
-```go
-import "github.com/go4x/goal/value"
-
-// 比较值
-fmt.Println(value.Equal(42, 42))     // true
-fmt.Println(value.Equal("hello", "hello")) // true
-fmt.Println(value.Equal(42, 43))    // false
-
-// 检查不等
-fmt.Println(value.NotEqual(42, 43))  // true
-fmt.Println(value.NotEqual(42, 42))  // false
-```
-
-#### DeepEqual - 深度值比较
-
-```go
-import "github.com/go4x/goal/value"
-
-// 使用反射进行深度比较
-slice1 := []int{1, 2, 3}
-slice2 := []int{1, 2, 3}
-slice3 := []int{1, 2, 4}
-
-fmt.Println(value.DeepEqual(slice1, slice2)) // true
-fmt.Println(value.DeepEqual(slice1, slice3)) // false
-
-// 比较结构体
-type Person struct {
-    Name string
-    Age  int
-}
-
-p1 := Person{Name: "John", Age: 30}
-p2 := Person{Name: "John", Age: 30}
-p3 := Person{Name: "Jane", Age: 30}
-
-fmt.Println(value.DeepEqual(p1, p2)) // true
-fmt.Println(value.DeepEqual(p1, p3)) // false
-```
-
 ## 高级用法
 
 ### 配置处理
@@ -355,7 +249,7 @@ func LoadConfig() Config {
 }
 
 func parseInt(s string) int {
-    if value.IsEmpty(s) {
+    if s == "" {
         return 0
     }
     return value.Must(strconv.Atoi(s))
@@ -369,7 +263,7 @@ import "github.com/go4x/goal/value"
 
 // 安全错误处理
 func ProcessData(data string) (string, error) {
-    if value.IsEmpty(data) {
+    if data == "" {
         return "", errors.New("数据为空")
     }
     
@@ -379,7 +273,7 @@ func ProcessData(data string) (string, error) {
 }
 
 func transformData(data string) (string, error) {
-    if value.IsEmpty(data) {
+    if data == "" {
         return "", errors.New("空数据")
     }
     return strings.ToUpper(data), nil
@@ -393,15 +287,15 @@ import "github.com/go4x/goal/value"
 
 // 验证用户输入
 func ValidateUser(user User) error {
-    if value.IsEmpty(user.Name) {
+    if user.Name == "" {
         return errors.New("姓名是必需的")
     }
     
-    if value.IsZero(user.Age) || user.Age < 0 {
+    if user.Age <= 0 {
         return errors.New("年龄必须为正数")
     }
     
-    if value.IsNil(user.Email) || value.IsEmpty(*user.Email) {
+    if user.Email == nil || *user.Email == "" {
         return errors.New("邮箱是必需的")
     }
     
@@ -434,8 +328,8 @@ func ProcessAPIResponse(response *APIResponse) string {
     
     // 条件格式化
     return value.IfElse(
-        value.IsNotEmpty(message),
-        fmt.Sprintf("[%s] %s", status, message),
+        message != nil && *message != "",
+        fmt.Sprintf("[%s] %s", status, *message),
         fmt.Sprintf("[%s] 无消息", status),
     )
 }
@@ -456,14 +350,14 @@ import "github.com/go4x/goal/value"
 func ProcessItems(items []Item) []Item {
     return slicex.From(items).
         Filter(func(item Item) bool {
-            return value.IsNotEmpty(item.Name) && value.IsNotZero(item.Price)
+            return item.Name != "" && item.Price != 0.0
         }).
         Map(func(item Item) Item {
             return Item{
                 Name:  value.OrElse("Unknown", item.Name, ""),
                 Price: value.OrElse(0.0, item.Price, 0.0),
                 Category: value.IfElse(
-                    value.IsNotEmpty(item.Category),
+                    item.Category != "",
                     item.Category,
                     "uncategorized",
                 ),
@@ -481,12 +375,6 @@ type Item struct {
 
 ## 性能考虑
 
-### 零值检查
-
-- **IsZero/IsNotZero**：O(1) - 与零值直接比较
-- **IsEmpty/IsNotEmpty**：O(1) 对于大多数类型，O(n) 对于切片/映射（长度检查）
-- **IsNil/IsNotNil**：O(1) - 基于反射的 nil 检查
-
 ### 合并操作
 
 - **Or/OrElse**：O(n) - 线性扫描值
@@ -501,11 +389,11 @@ type Item struct {
 
 ### 最佳实践
 
-1. **使用 IsZero/IsNotZero** 进行简单的零值检查
-2. **使用 IsEmpty/IsNotEmpty** 进行全面的空值检查
-3. **使用 Or/OrElse** 进行回退值链
-4. **使用 SafeDeref** 进行安全指针操作
-5. **使用 Must** 仅在你确定操作会成功时
+1. **使用 Or/OrElse** 进行回退值链
+2. **使用 SafeDeref** 进行安全指针操作
+3. **使用 Must** 仅在你确定操作会成功时
+4. **使用 IfElse/If** 进行条件值选择
+5. **使用 Coalesce** 进行基于指针的回退链
 
 ## 线程安全
 
@@ -532,17 +420,6 @@ type Item struct {
 | `CoalesceValue(values...)` | 返回第一个非零值 | O(n) |
 | `CoalesceValueDef(default, values...)` | 返回第一个非零值或默认值 | O(n) |
 
-### 检查函数
-
-| 函数 | 描述 | 时间复杂度 |
-|------|------|------------|
-| `IsZero(value)` | 检查值是否为零 | O(1) |
-| `IsNotZero(value)` | 检查值是否不为零 | O(1) |
-| `IsNil(value)` | 检查值是否为 nil | O(1) |
-| `IsNotNil(value)` | 检查值是否不为 nil | O(1) |
-| `IsEmpty(value)` | 检查值是否为空 | O(1) |
-| `IsNotEmpty(value)` | 检查值是否不为空 | O(1) |
-
 ### 安全操作
 
 | 函数 | 描述 | 时间复杂度 |
@@ -552,14 +429,6 @@ type Item struct {
 | `SafeDerefDef(pointer, default)` | 带默认值的安全指针解引用 | O(1) |
 | `Value(interface{})` | 从接口提取值 | O(1) |
 | `Def(value, default)` | 返回值或空时返回默认值 | O(1) |
-
-### 比较函数
-
-| 函数 | 描述 | 时间复杂度 |
-|------|------|------------|
-| `Equal(a, b)` | 检查值是否相等 | O(1) |
-| `NotEqual(a, b)` | 检查值是否不相等 | O(1) |
-| `DeepEqual(a, b)` | 使用反射进行深度比较 | O(n) |
 
 ## 使用场景
 
@@ -586,15 +455,15 @@ import "github.com/go4x/goal/value"
 
 // 验证输入数据
 func ValidateInput(data InputData) error {
-    if value.IsEmpty(data.Name) {
+    if data.Name == "" {
         return errors.New("姓名是必需的")
     }
     
-    if value.IsZero(data.Age) || data.Age < 0 {
+    if data.Age <= 0 {
         return errors.New("年龄必须为正数")
     }
     
-    if value.IsNil(data.Email) || value.IsEmpty(*data.Email) {
+    if data.Email == nil || *data.Email == "" {
         return errors.New("邮箱是必需的")
     }
     
@@ -618,8 +487,8 @@ func ProcessResponse(response *APIResponse) string {
     status := value.SafeDerefDef(response.Status, "unknown")
     
     return value.IfElse(
-        value.IsNotEmpty(message),
-        fmt.Sprintf("[%s] %s", status, message),
+        message != nil && *message != "",
+        fmt.Sprintf("[%s] %s", status, *message),
         fmt.Sprintf("[%s] 无消息", status),
     )
 }
@@ -632,7 +501,7 @@ import "github.com/go4x/goal/value"
 
 // 安全错误处理
 func ProcessData(data string) (string, error) {
-    if value.IsEmpty(data) {
+    if data == "" {
         return "", errors.New("数据为空")
     }
     

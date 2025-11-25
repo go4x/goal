@@ -5,7 +5,7 @@ A comprehensive generic value handling package for Go that provides utilities fo
 ## Features
 
 - **Generic Type Support**: Works with any comparable type
-- **Null/Empty Handling**: Comprehensive checks for nil, empty, and zero values
+- **Null/Empty Handling**: Safe operations for nil and empty values
 - **Conditional Logic**: Functional approach to conditional operations
 - **Safe Operations**: Panic-safe operations with proper error handling
 - **Pointer Operations**: Safe dereferencing and pointer manipulation
@@ -31,11 +31,6 @@ import (
 func main() {
     // Conditional logic
     result := value.IfElse(age >= 18, "adult", "minor")
-    
-    // Null/empty checks
-    if value.IsNotEmpty(data) {
-        fmt.Println("Data is not empty")
-    }
     
     // Safe operations
     safeValue := value.Must(strconv.Atoi("123"))
@@ -153,63 +148,6 @@ number := value.Coalesce(p1, p2, p3)
 fmt.Println(number) // 42
 ```
 
-### Null/Empty Checks
-
-#### IsZero/IsNotZero - Zero Value Checks
-
-```go
-import "github.com/go4x/goal/value"
-
-// Check for zero values
-fmt.Println(value.IsZero(0))        // true
-fmt.Println(value.IsZero(""))      // true
-fmt.Println(value.IsZero(false))  // true
-fmt.Println(value.IsZero(42))     // false
-fmt.Println(value.IsZero("hello")) // false
-
-// Check for non-zero values
-fmt.Println(value.IsNotZero(42))     // true
-fmt.Println(value.IsNotZero("hello")) // true
-fmt.Println(value.IsNotZero(0))      // false
-```
-
-#### IsNil/IsNotNil - Nil Checks
-
-```go
-import "github.com/go4x/goal/value"
-
-var ptr *int
-fmt.Println(value.IsNil(ptr))        // true
-fmt.Println(value.IsNil(nil))       // true
-fmt.Println(value.IsNil([]int{}))   // false (empty slice is not nil)
-fmt.Println(value.IsNil((*int)(nil))) // true
-
-// Check for non-nil values
-ptr = &42
-fmt.Println(value.IsNotNil(ptr))     // true
-fmt.Println(value.IsNotNil([]int{})) // true (empty slice is not nil)
-fmt.Println(value.IsNotNil(nil))     // false
-```
-
-#### IsEmpty/IsNotEmpty - Empty Value Checks
-
-```go
-import "github.com/go4x/goal/value"
-
-// Check for empty values
-fmt.Println(value.IsEmpty(""))                    // true
-fmt.Println(value.IsEmpty([]int{}))              // true
-fmt.Println(value.IsEmpty(map[string]int{}))     // true
-fmt.Println(value.IsEmpty(0))                   // true
-fmt.Println(value.IsEmpty("hello"))              // false
-fmt.Println(value.IsEmpty([]int{1, 2}))         // false
-
-// Check for non-empty values
-fmt.Println(value.IsNotEmpty("hello"))           // true
-fmt.Println(value.IsNotEmpty([]int{1, 2}))      // true
-fmt.Println(value.IsNotEmpty(""))                // false
-```
-
 ### Safe Operations
 
 #### Must - Panic on Error
@@ -286,50 +224,6 @@ result = value.Def("hello", "default")
 fmt.Println(result) // "hello"
 ```
 
-### Comparison Operations
-
-#### Equal/NotEqual - Value Comparison
-
-```go
-import "github.com/go4x/goal/value"
-
-// Compare values
-fmt.Println(value.Equal(42, 42))     // true
-fmt.Println(value.Equal("hello", "hello")) // true
-fmt.Println(value.Equal(42, 43))    // false
-
-// Check inequality
-fmt.Println(value.NotEqual(42, 43))  // true
-fmt.Println(value.NotEqual(42, 42))  // false
-```
-
-#### DeepEqual - Deep Value Comparison
-
-```go
-import "github.com/go4x/goal/value"
-
-// Deep comparison using reflection
-slice1 := []int{1, 2, 3}
-slice2 := []int{1, 2, 3}
-slice3 := []int{1, 2, 4}
-
-fmt.Println(value.DeepEqual(slice1, slice2)) // true
-fmt.Println(value.DeepEqual(slice1, slice3)) // false
-
-// Compare structs
-type Person struct {
-    Name string
-    Age  int
-}
-
-p1 := Person{Name: "John", Age: 30}
-p2 := Person{Name: "John", Age: 30}
-p3 := Person{Name: "Jane", Age: 30}
-
-fmt.Println(value.DeepEqual(p1, p2)) // true
-fmt.Println(value.DeepEqual(p1, p3)) // false
-```
-
 ## Advanced Usage
 
 ### Configuration Handling
@@ -355,7 +249,7 @@ func LoadConfig() Config {
 }
 
 func parseInt(s string) int {
-    if value.IsEmpty(s) {
+    if s == "" {
         return 0
     }
     return value.Must(strconv.Atoi(s))
@@ -369,7 +263,7 @@ import "github.com/go4x/goal/value"
 
 // Safe error handling
 func ProcessData(data string) (string, error) {
-    if value.IsEmpty(data) {
+    if data == "" {
         return "", errors.New("data is empty")
     }
     
@@ -379,7 +273,7 @@ func ProcessData(data string) (string, error) {
 }
 
 func transformData(data string) (string, error) {
-    if value.IsEmpty(data) {
+    if data == "" {
         return "", errors.New("empty data")
     }
     return strings.ToUpper(data), nil
@@ -393,15 +287,15 @@ import "github.com/go4x/goal/value"
 
 // Validate user input
 func ValidateUser(user User) error {
-    if value.IsEmpty(user.Name) {
+    if user.Name == "" {
         return errors.New("name is required")
     }
     
-    if value.IsZero(user.Age) || user.Age < 0 {
+    if user.Age <= 0 {
         return errors.New("age must be positive")
     }
     
-    if value.IsNil(user.Email) || value.IsEmpty(*user.Email) {
+    if user.Email == nil || *user.Email == "" {
         return errors.New("email is required")
     }
     
@@ -434,8 +328,8 @@ func ProcessAPIResponse(response *APIResponse) string {
     
     // Conditional formatting
     return value.IfElse(
-        value.IsNotEmpty(message),
-        fmt.Sprintf("[%s] %s", status, message),
+        message != nil && *message != "",
+        fmt.Sprintf("[%s] %s", status, *message),
         fmt.Sprintf("[%s] No message", status),
     )
 }
@@ -456,14 +350,14 @@ import "github.com/go4x/goal/value"
 func ProcessItems(items []Item) []Item {
     return slicex.From(items).
         Filter(func(item Item) bool {
-            return value.IsNotEmpty(item.Name) && value.IsNotZero(item.Price)
+            return item.Name != "" && item.Price != 0.0
         }).
         Map(func(item Item) Item {
             return Item{
                 Name:  value.OrElse("Unknown", item.Name, ""),
                 Price: value.OrElse(0.0, item.Price, 0.0),
                 Category: value.IfElse(
-                    value.IsNotEmpty(item.Category),
+                    item.Category != "",
                     item.Category,
                     "uncategorized",
                 ),
@@ -481,12 +375,6 @@ type Item struct {
 
 ## Performance Considerations
 
-### Zero-Value Checks
-
-- **IsZero/IsNotZero**: O(1) - Direct comparison with zero value
-- **IsEmpty/IsNotEmpty**: O(1) for most types, O(n) for slices/maps (length check)
-- **IsNil/IsNotNil**: O(1) - Reflection-based nil check
-
 ### Coalescing Operations
 
 - **Or/OrElse**: O(n) - Linear scan through values
@@ -501,11 +389,11 @@ type Item struct {
 
 ### Best Practices
 
-1. **Use IsZero/IsNotZero** for simple zero-value checks
-2. **Use IsEmpty/IsNotEmpty** for comprehensive empty checks
-3. **Use Or/OrElse** for fallback value chains
-4. **Use SafeDeref** for safe pointer operations
-5. **Use Must** only when you're certain operations will succeed
+1. **Use Or/OrElse** for fallback value chains
+2. **Use SafeDeref** for safe pointer operations
+3. **Use Must** only when you're certain operations will succeed
+4. **Use IfElse/If** for conditional value selection
+5. **Use Coalesce** for pointer-based fallback chains
 
 ## Thread Safety
 
@@ -532,17 +420,6 @@ type Item struct {
 | `CoalesceValue(values...)` | Return first non-zero value | O(n) |
 | `CoalesceValueDef(default, values...)` | Return first non-zero value or default | O(n) |
 
-### Check Functions
-
-| Function | Description | Time Complexity |
-|----------|-------------|-----------------|
-| `IsZero(value)` | Check if value is zero | O(1) |
-| `IsNotZero(value)` | Check if value is not zero | O(1) |
-| `IsNil(value)` | Check if value is nil | O(1) |
-| `IsNotNil(value)` | Check if value is not nil | O(1) |
-| `IsEmpty(value)` | Check if value is empty | O(1) |
-| `IsNotEmpty(value)` | Check if value is not empty | O(1) |
-
 ### Safe Operations
 
 | Function | Description | Time Complexity |
@@ -552,14 +429,6 @@ type Item struct {
 | `SafeDerefDef(pointer, default)` | Safe pointer dereferencing with default | O(1) |
 | `Value(interface{})` | Extract value from interface | O(1) |
 | `Def(value, default)` | Return value or default if empty | O(1) |
-
-### Comparison Functions
-
-| Function | Description | Time Complexity |
-|----------|-------------|-----------------|
-| `Equal(a, b)` | Check if values are equal | O(1) |
-| `NotEqual(a, b)` | Check if values are not equal | O(1) |
-| `DeepEqual(a, b)` | Deep comparison using reflection | O(n) |
 
 ## Use Cases
 
@@ -586,15 +455,15 @@ import "github.com/go4x/goal/value"
 
 // Validate input data
 func ValidateInput(data InputData) error {
-    if value.IsEmpty(data.Name) {
+    if data.Name == "" {
         return errors.New("name is required")
     }
     
-    if value.IsZero(data.Age) || data.Age < 0 {
+    if data.Age <= 0 {
         return errors.New("age must be positive")
     }
     
-    if value.IsNil(data.Email) || value.IsEmpty(*data.Email) {
+    if data.Email == nil || *data.Email == "" {
         return errors.New("email is required")
     }
     
@@ -618,8 +487,8 @@ func ProcessResponse(response *APIResponse) string {
     status := value.SafeDerefDef(response.Status, "unknown")
     
     return value.IfElse(
-        value.IsNotEmpty(message),
-        fmt.Sprintf("[%s] %s", status, message),
+        message != nil && *message != "",
+        fmt.Sprintf("[%s] %s", status, *message),
         fmt.Sprintf("[%s] No message", status),
     )
 }
@@ -632,7 +501,7 @@ import "github.com/go4x/goal/value"
 
 // Safe error handling
 func ProcessData(data string) (string, error) {
-    if value.IsEmpty(data) {
+    if data == "" {
         return "", errors.New("data is empty")
     }
     

@@ -39,55 +39,6 @@ func ExampleOrElse() {
 	// Output: fallback
 }
 
-// ExampleIsZero demonstrates the IsZero function
-func ExampleIsZero() {
-	fmt.Println(value.IsZero(0))       // true
-	fmt.Println(value.IsZero(""))      // true
-	fmt.Println(value.IsZero(false))   // true
-	fmt.Println(value.IsZero(42))      // false
-	fmt.Println(value.IsZero("hello")) // false
-	// Output:
-	// true
-	// true
-	// true
-	// false
-	// false
-}
-
-// ExampleIsNil demonstrates the IsNil function
-func ExampleIsNil() {
-	var ptr *int
-	fmt.Println(value.IsNil(ptr))     // true
-	fmt.Println(value.IsNil(nil))     // true
-	fmt.Println(value.IsNil([]int{})) // false (empty slice is not nil)
-
-	val := 42
-	ptr = &val
-	fmt.Println(value.IsNil(ptr)) // false
-	// Output:
-	// true
-	// true
-	// false
-	// false
-}
-
-// ExampleIsEmpty demonstrates the IsEmpty function
-func ExampleIsEmpty() {
-	fmt.Println(value.IsEmpty(""))               // true
-	fmt.Println(value.IsEmpty([]int{}))          // true
-	fmt.Println(value.IsEmpty(map[string]int{})) // true
-	fmt.Println(value.IsEmpty(0))                // true
-	fmt.Println(value.IsEmpty("hello"))          // false
-	fmt.Println(value.IsEmpty([]int{1, 2}))      // false
-	// Output:
-	// true
-	// true
-	// true
-	// true
-	// false
-	// false
-}
-
 // ExampleIf demonstrates the If function
 func ExampleIf() {
 	age := 20
@@ -170,29 +121,4 @@ func ExampleSafeDerefDef() {
 	// Output:
 	// 100
 	// 42
-}
-
-// ExampleEqual demonstrates the Equal function
-func ExampleEqual() {
-	fmt.Println(value.Equal(42, 42))        // true
-	fmt.Println(value.Equal("hello", "hi")) // false
-	fmt.Println(value.Equal(0, 0))          // true
-	// Output:
-	// true
-	// false
-	// true
-}
-
-// ExampleDeepEqual demonstrates the DeepEqual function
-func ExampleDeepEqual() {
-	slice1 := []int{1, 2, 3}
-	slice2 := []int{1, 2, 3}
-	fmt.Println(value.DeepEqual(slice1, slice2)) // true
-
-	map1 := map[string]int{"a": 1}
-	map2 := map[string]int{"a": 1}
-	fmt.Println(value.DeepEqual(map1, map2)) // true
-	// Output:
-	// true
-	// true
 }
