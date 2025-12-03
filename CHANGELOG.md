@@ -51,3 +51,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Benchmark tests for performance-critical operations
 - Example tests for documentation
 - Comprehensive test coverage
+
+## [1.1.0] - 2025-12-03
+
+### Changed
+- **value**: Moved generic check and comparison helpers (`Zero`, `NotZero`, `Nil`, `NotNil`, `Empty`, `NotEmpty`, `Equal`, `NotEqual`, `DeepEqual`) out of the `value` package into the new `is` package to better reflect their semantics.
+
+### Added
+- **is**:
+  - Introduced a dedicated value checking and comparison package with:
+    - Boolean helpers: `Not`, `True`, `False`
+    - Zero / empty / nil helpers: `Zero`, `NotZero`, `Nil`, `NotNil`, `Empty`, `NotEmpty`
+    - Equality helpers: `Eq`, `Neq`, `EqDeep`, `Same`
+    - Ordered comparisons: `Gt`, `Gte`, `Lt`, `Lte` based on `cmp.Ordered`
+  - `Eq` now supports:
+    - Basic types via `==`
+    - Pointers by comparing the pointed-to values (including nested pointers)
+    - Interfaces by comparing underlying concrete values
+    - Slices and maps via deep comparison
+    - Channels by reference (standard Go behavior)
+    - Functions, returning true only when both are nil
+  - Added comprehensive tests covering:
+    - Structs, pointers, interfaces, slices, maps, channels, functions
+    - Ordered comparisons for integers and strings
+  - Added bilingual (`README.md` / `README_CN.md`) documentation describing the new `is` API, behavior, and best practices.
