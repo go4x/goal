@@ -32,20 +32,20 @@ func main() {
     if is.Zero(0) {
         fmt.Println("Value is zero")
     }
-    
+
     // Nil checks
     var ptr *int
     if is.Nil(ptr) {
         fmt.Println("Pointer is nil")
     }
-    
+
     // Empty checks
     if is.Empty("") {
         fmt.Println("String is empty")
     }
-    
+
     // Value comparison
-    if is.Equal(42, 42) {
+    if is.Eq(42, 42) {
         fmt.Println("Values are equal")
     }
 }
@@ -201,54 +201,49 @@ fmt.Println(is.NotEmpty([]int{}))           // false
 
 ### Value Comparison
 
-#### Equal - Equality Check
+#### Eq - Equality Check
 
 ```go
 import "github.com/go4x/goal/is"
 
 // Compare values
-fmt.Println(is.Equal(42, 42))              // true
-fmt.Println(is.Equal("hello", "hello"))    // true
-fmt.Println(is.Equal(42, 43))              // false
-fmt.Println(is.Equal("hello", "hi"))      // false
+fmt.Println(is.Eq(42, 42))              // true
+fmt.Println(is.Eq("hello", "hello"))    // true
+fmt.Println(is.Eq(42, 43))              // false
+fmt.Println(is.Eq("hello", "hi"))       // false
 
 // With different types
-fmt.Println(is.Equal(true, true))          // true
-fmt.Println(is.Equal(3.14, 3.14))          // true
-```
+fmt.Println(is.Eq(true, true))          // true
+fmt.Println(is.Eq(3.14, 3.14))          // true
 
-#### NotEqual - Inequality Check
+// Pointers - compare by value, not by address
+v1, v2 := 42, 42
+fmt.Println(is.Eq(&v1, &v2))            // true
 
-```go
-import "github.com/go4x/goal/is"
-
-// Check inequality
-fmt.Println(is.NotEqual(42, 43))          // true
-fmt.Println(is.NotEqual("hello", "hi"))   // true
-fmt.Println(is.NotEqual(42, 42))          // false
-fmt.Println(is.NotEqual("hello", "hello")) // false
-```
-
-#### DeepEqual - Deep Equality Check
-
-```go
-import "github.com/go4x/goal/is"
+// Structs
+type Person struct {
+    Name string
+    Age  int
+}
+p1 := Person{Name: "John", Age: 30}
+p2 := Person{Name: "John", Age: 30}
+fmt.Println(is.Eq(p1, p2))              // true
 
 // Deep comparison using reflection
 slice1 := []int{1, 2, 3}
 slice2 := []int{1, 2, 3}
 slice3 := []int{1, 2, 4}
 
-fmt.Println(is.DeepEqual(slice1, slice2)) // true
-fmt.Println(is.DeepEqual(slice1, slice3)) // false
+fmt.Println(is.Eq(slice1, slice2)) // true
+fmt.Println(is.Eq(slice1, slice3)) // false
 
 // Compare maps
 map1 := map[string]int{"a": 1, "b": 2}
 map2 := map[string]int{"a": 1, "b": 2}
 map3 := map[string]int{"a": 1, "b": 3}
 
-fmt.Println(is.DeepEqual(map1, map2)) // true
-fmt.Println(is.DeepEqual(map1, map3)) // false
+fmt.Println(is.Eq(map1, map2)) // true
+fmt.Println(is.Eq(map1, map3)) // false
 
 // Compare structs
 type Person struct {
@@ -260,8 +255,32 @@ p1 := Person{Name: "John", Age: 30}
 p2 := Person{Name: "John", Age: 30}
 p3 := Person{Name: "Jane", Age: 30}
 
-fmt.Println(is.DeepEqual(p1, p2)) // true
-fmt.Println(is.DeepEqual(p1, p3)) // false
+fmt.Println(is.Eq(p1, p2)) // true
+fmt.Println(is.Eq(p1, p3)) // false
+
+// compare functions, only return true if both are nil, otherwise return false
+
+type Func func() int
+var v1 Func = nil
+var v2 Func = nil
+fmt.Println(is.Eq(v1, v2)) // true
+v1 := func() int { return 1 }
+v2 := v1
+v3 := func() int { return 1 }
+fmt.Println(is.Eq(v1, v2)) // false
+fmt.Println(is.Eq(v1, v3)) // false
+```
+
+#### Neq - Inequality Check
+
+```go
+import "github.com/go4x/goal/is"
+
+// Check inequality
+fmt.Println(is.Neq(42, 43))          // true
+fmt.Println(is.Neq("hello", "hi"))   // true
+fmt.Println(is.Neq(42, 42))          // false
+fmt.Println(is.Neq("hello", "hello")) // false
 ```
 
 ## Advanced Usage
@@ -276,15 +295,15 @@ func ValidateUser(user User) error {
     if is.Empty(user.Name) {
         return errors.New("name is required")
     }
-    
+
     if is.Zero(user.Age) || user.Age < 0 {
         return errors.New("age must be positive")
     }
-    
+
     if is.Nil(user.Email) || is.Empty(*user.Email) {
         return errors.New("email is required")
     }
-    
+
     return nil
 }
 
@@ -305,15 +324,15 @@ func ValidateConfig(config Config) error {
     if is.Empty(config.Host) {
         return errors.New("host is required")
     }
-    
+
     if is.Zero(config.Port) || config.Port <= 0 {
         return errors.New("port must be positive")
     }
-    
+
     if is.Nil(config.Database) {
         return errors.New("database config is required")
     }
-    
+
     return nil
 }
 ```
@@ -328,16 +347,16 @@ func ProcessResponse(response *APIResponse) error {
     if is.Nil(response) {
         return errors.New("response is nil")
     }
-    
+
     if is.Empty(response.Data) {
         return errors.New("response data is empty")
     }
-    
+
     // Check if response is successful
     if is.NotEqual(response.Status, "success") {
         return fmt.Errorf("unexpected status: %s", response.Status)
     }
-    
+
     return nil
 }
 ```
@@ -360,7 +379,7 @@ func FilterValidItems(items []Item) []Item {
 
 // Compare collections
 func AreCollectionsEqual(a, b []int) bool {
-    return is.DeepEqual(a, b)
+    return is.EqDeep(a, b)
 }
 ```
 
@@ -374,16 +393,16 @@ func AreCollectionsEqual(a, b []int) bool {
 
 ### Comparison Operations
 
-- **Equal/NotEqual**: O(1) - Direct equality check
-- **DeepEqual**: O(n) - Reflection-based deep comparison
+- **Eq/Neq**: O(1) - Direct or reflection-based equality check
+- **EqDeep**: O(n) - Reflection-based deep comparison
 
 ### Best Practices
 
 1. **Use Zero/NotZero** for simple zero-value checks with comparable types
 2. **Use Empty/NotEmpty** for comprehensive empty checks across all types
 3. **Use Nil/NotNil** for reference type nil checks
-4. **Use Equal/NotEqual** for simple value comparisons
-5. **Use DeepEqual** for complex nested structure comparisons
+4. **Use Eq/Neq** for value comparisons (including pointers, structs, interfaces)
+5. **Use EqDeep** for complex nested structure comparisons
 
 ## Thread Safety
 
@@ -393,30 +412,30 @@ func AreCollectionsEqual(a, b []int) bool {
 
 ### Boolean Functions
 
-| Function | Description | Time Complexity |
-|----------|-------------|-----------------|
-| `Not(v)` | Return logical negation of boolean | O(1) |
-| `True(v)` | Return true if value is true | O(1) |
-| `False(v)` | Return true if value is false | O(1) |
+| Function   | Description                        | Time Complexity |
+| ---------- | ---------------------------------- | --------------- |
+| `Not(v)`   | Return logical negation of boolean | O(1)            |
+| `True(v)`  | Return true if value is true       | O(1)            |
+| `False(v)` | Return true if value is false      | O(1)            |
 
 ### Check Functions
 
-| Function | Description | Time Complexity |
-|----------|-------------|-----------------|
-| `Zero(value)` | Check if value is zero | O(1) |
-| `NotZero(value)` | Check if value is not zero | O(1) |
-| `Nil(value)` | Check if value is nil | O(1) |
-| `NotNil(value)` | Check if value is not nil | O(1) |
-| `Empty(value)` | Check if value is empty | O(1) |
-| `NotEmpty(value)` | Check if value is not empty | O(1) |
+| Function          | Description                 | Time Complexity |
+| ----------------- | --------------------------- | --------------- |
+| `Zero(value)`     | Check if value is zero      | O(1)            |
+| `NotZero(value)`  | Check if value is not zero  | O(1)            |
+| `Nil(value)`      | Check if value is nil       | O(1)            |
+| `NotNil(value)`   | Check if value is not nil   | O(1)            |
+| `Empty(value)`    | Check if value is empty     | O(1)            |
+| `NotEmpty(value)` | Check if value is not empty | O(1)            |
 
 ### Comparison Functions
 
-| Function | Description | Time Complexity |
-|----------|-------------|-----------------|
-| `Equal(a, b)` | Check if values are equal | O(1) |
-| `NotEqual(a, b)` | Check if values are not equal | O(1) |
-| `DeepEqual(a, b)` | Deep comparison using reflection | O(n) |
+| Function          | Description                      | Time Complexity |
+| ----------------- | -------------------------------- | --------------- |
+| `Equal(a, b)`     | Check if values are equal        | O(1)            |
+| `NotEqual(a, b)`  | Check if values are not equal    | O(1)            |
+| `DeepEqual(a, b)` | Deep comparison using reflection | O(n)            |
 
 ## Use Cases
 
@@ -430,15 +449,15 @@ func ValidateInput(data InputData) error {
     if is.Empty(data.Name) {
         return errors.New("name is required")
     }
-    
+
     if is.Zero(data.Age) || data.Age < 0 {
         return errors.New("age must be positive")
     }
-    
+
     if is.Nil(data.Email) || is.Empty(*data.Email) {
         return errors.New("email is required")
     }
-    
+
     return nil
 }
 ```
@@ -453,11 +472,11 @@ func CheckConfig(config Config) error {
     if is.Empty(config.Host) {
         return errors.New("host cannot be empty")
     }
-    
+
     if is.Zero(config.Port) {
         return errors.New("port must be specified")
     }
-    
+
     return nil
 }
 ```
@@ -469,12 +488,12 @@ import "github.com/go4x/goal/is"
 
 // Compare data structures
 func CompareData(old, new Data) bool {
-    return is.DeepEqual(old, new)
+    return is.EqDeep(old, new)
 }
 
 // Check if values changed
 func HasChanged(old, new string) bool {
-    return is.NotEqual(old, new)
+    return is.Neq(old, new)
 }
 ```
 
@@ -488,12 +507,12 @@ func ProcessData(data string) error {
     if is.Empty(data) {
         return errors.New("data is empty")
     }
-    
+
     if is.NotEmpty(data) {
         // Process non-empty data
         return process(data)
     }
-    
+
     return nil
 }
 ```
@@ -501,4 +520,3 @@ func ProcessData(data string) error {
 ## License
 
 This package is part of the goal project and follows the same license terms.
-

@@ -32,20 +32,20 @@ func main() {
     if is.Zero(0) {
         fmt.Println("值为零")
     }
-    
+
     // Nil 检查
     var ptr *int
     if is.Nil(ptr) {
         fmt.Println("指针为 nil")
     }
-    
+
     // 空值检查
     if is.Empty("") {
         fmt.Println("字符串为空")
     }
-    
+
     // 值比较
-    if is.Equal(42, 42) {
+    if is.Eq(42, 42) {
         fmt.Println("值相等")
     }
 }
@@ -201,54 +201,49 @@ fmt.Println(is.NotEmpty([]int{}))           // false
 
 ### 值比较
 
-#### Equal - 相等性检查
+#### Eq - 相等性检查
 
 ```go
 import "github.com/go4x/goal/is"
 
 // 比较值
-fmt.Println(is.Equal(42, 42))              // true
-fmt.Println(is.Equal("hello", "hello"))    // true
-fmt.Println(is.Equal(42, 43))              // false
-fmt.Println(is.Equal("hello", "hi"))       // false
+fmt.Println(is.Eq(42, 42))              // true
+fmt.Println(is.Eq("hello", "hello"))    // true
+fmt.Println(is.Eq(42, 43))              // false
+fmt.Println(is.Eq("hello", "hi"))       // false
 
 // 不同类型
-fmt.Println(is.Equal(true, true))           // true
-fmt.Println(is.Equal(3.14, 3.14))          // true
-```
+fmt.Println(is.Eq(true, true))           // true
+fmt.Println(is.Eq(3.14, 3.14))          // true
 
-#### NotEqual - 不等性检查
+// 指针 - 比较的是指向的值，而不是地址
+v1, v2 := 42, 42
+fmt.Println(is.Eq(&v1, &v2))            // true
 
-```go
-import "github.com/go4x/goal/is"
+// 结构体
+type Person struct {
+    Name string
+    Age  int
+}
+p1 := Person{Name: "John", Age: 30}
+p2 := Person{Name: "John", Age: 30}
+fmt.Println(is.Eq(p1, p2))              // true
 
-// 检查不等
-fmt.Println(is.NotEqual(42, 43))            // true
-fmt.Println(is.NotEqual("hello", "hi"))    // true
-fmt.Println(is.NotEqual(42, 42))            // false
-fmt.Println(is.NotEqual("hello", "hello"))  // false
-```
-
-#### DeepEqual - 深度相等性检查
-
-```go
-import "github.com/go4x/goal/is"
-
-// 使用反射进行深度比较
+// 深度比较使用反射
 slice1 := []int{1, 2, 3}
 slice2 := []int{1, 2, 3}
 slice3 := []int{1, 2, 4}
 
-fmt.Println(is.DeepEqual(slice1, slice2)) // true
-fmt.Println(is.DeepEqual(slice1, slice3)) // false
+fmt.Println(is.Eq(slice1, slice2)) // true
+fmt.Println(is.Eq(slice1, slice3)) // false
 
 // 比较映射
 map1 := map[string]int{"a": 1, "b": 2}
 map2 := map[string]int{"a": 1, "b": 2}
 map3 := map[string]int{"a": 1, "b": 3}
 
-fmt.Println(is.DeepEqual(map1, map2)) // true
-fmt.Println(is.DeepEqual(map1, map3)) // false
+fmt.Println(is.Eq(map1, map2)) // true
+fmt.Println(is.Eq(map1, map3)) // false
 
 // 比较结构体
 type Person struct {
@@ -258,10 +253,30 @@ type Person struct {
 
 p1 := Person{Name: "John", Age: 30}
 p2 := Person{Name: "John", Age: 30}
-p3 := Person{Name: "Jane", Age: 30}
+fmt.Println(is.Eq(p1, p2)) // true
 
-fmt.Println(is.DeepEqual(p1, p2)) // true
-fmt.Println(is.DeepEqual(p1, p3)) // false
+// 比较函数, 只有当两个函数都为 nil 时才返回 true, 否则返回 false
+type Func func() int
+var v1 Func = nil
+var v2 Func = nil
+fmt.Println(is.Eq(v1, v2)) // true
+v1 := func() int { return 1 }
+v2 := v1
+v3 := func() int { return 1 }
+fmt.Println(is.Eq(v1, v2)) // false
+fmt.Println(is.Eq(v1, v3)) // false
+```
+
+#### Neq - 不等性检查
+
+```go
+import "github.com/go4x/goal/is"
+
+// 检查不等
+fmt.Println(is.Neq(42, 43))            // true
+fmt.Println(is.Neq("hello", "hi"))    // true
+fmt.Println(is.Neq(42, 42))            // false
+fmt.Println(is.Neq("hello", "hello"))  // false
 ```
 
 ## 高级用法
@@ -276,15 +291,15 @@ func ValidateUser(user User) error {
     if is.Empty(user.Name) {
         return errors.New("姓名是必需的")
     }
-    
+
     if is.Zero(user.Age) || user.Age < 0 {
         return errors.New("年龄必须为正数")
     }
-    
+
     if is.Nil(user.Email) || is.Empty(*user.Email) {
         return errors.New("邮箱是必需的")
     }
-    
+
     return nil
 }
 
@@ -305,15 +320,15 @@ func ValidateConfig(config Config) error {
     if is.Empty(config.Host) {
         return errors.New("主机不能为空")
     }
-    
+
     if is.Zero(config.Port) || config.Port <= 0 {
         return errors.New("端口必须为正数")
     }
-    
+
     if is.Nil(config.Database) {
         return errors.New("数据库配置是必需的")
     }
-    
+
     return nil
 }
 ```
@@ -328,16 +343,16 @@ func ProcessResponse(response *APIResponse) error {
     if is.Nil(response) {
         return errors.New("响应为 nil")
     }
-    
+
     if is.Empty(response.Data) {
         return errors.New("响应数据为空")
     }
-    
+
     // 检查响应是否成功
     if is.NotEqual(response.Status, "success") {
         return fmt.Errorf("意外状态: %s", response.Status)
     }
-    
+
     return nil
 }
 ```
@@ -360,7 +375,7 @@ func FilterValidItems(items []Item) []Item {
 
 // 比较集合
 func AreCollectionsEqual(a, b []int) bool {
-    return is.DeepEqual(a, b)
+    return is.EqDeep(a, b)
 }
 ```
 
@@ -374,16 +389,16 @@ func AreCollectionsEqual(a, b []int) bool {
 
 ### 比较操作
 
-- **Equal/NotEqual**：O(1) - 直接相等性检查
-- **DeepEqual**：O(n) - 基于反射的深度比较
+- **Eq/Neq**：O(1) - 直接或基于反射的相等性检查
+- **EqDeep**：O(n) - 基于反射的深度比较
 
 ### 最佳实践
 
 1. **使用 Zero/NotZero** 对可比较类型进行简单的零值检查
 2. **使用 Empty/NotEmpty** 对所有类型进行全面的空值检查
 3. **使用 Nil/NotNil** 进行引用类型的 nil 检查
-4. **使用 Equal/NotEqual** 进行简单的值比较
-5. **使用 DeepEqual** 进行复杂的嵌套结构比较
+4. **使用 Eq/Neq** 进行值比较（包括指针、结构体、接口等）
+5. **使用 EqDeep** 进行复杂的嵌套结构比较
 
 ## 线程安全
 
@@ -393,30 +408,30 @@ func AreCollectionsEqual(a, b []int) bool {
 
 ### 布尔函数
 
-| 函数 | 描述 | 时间复杂度 |
-|------|------|------------|
-| `Not(v)` | 返回布尔值的逻辑取反 | O(1) |
-| `True(v)` | 如果值为 true 则返回 true | O(1) |
-| `False(v)` | 如果值为 false 则返回 true | O(1) |
+| 函数       | 描述                       | 时间复杂度 |
+| ---------- | -------------------------- | ---------- |
+| `Not(v)`   | 返回布尔值的逻辑取反       | O(1)       |
+| `True(v)`  | 如果值为 true 则返回 true  | O(1)       |
+| `False(v)` | 如果值为 false 则返回 true | O(1)       |
 
 ### 检查函数
 
-| 函数 | 描述 | 时间复杂度 |
-|------|------|------------|
-| `Zero(value)` | 检查值是否为零 | O(1) |
-| `NotZero(value)` | 检查值是否不为零 | O(1) |
-| `Nil(value)` | 检查值是否为 nil | O(1) |
-| `NotNil(value)` | 检查值是否不为 nil | O(1) |
-| `Empty(value)` | 检查值是否为空 | O(1) |
-| `NotEmpty(value)` | 检查值是否不为空 | O(1) |
+| 函数              | 描述               | 时间复杂度 |
+| ----------------- | ------------------ | ---------- |
+| `Zero(value)`     | 检查值是否为零     | O(1)       |
+| `NotZero(value)`  | 检查值是否不为零   | O(1)       |
+| `Nil(value)`      | 检查值是否为 nil   | O(1)       |
+| `NotNil(value)`   | 检查值是否不为 nil | O(1)       |
+| `Empty(value)`    | 检查值是否为空     | O(1)       |
+| `NotEmpty(value)` | 检查值是否不为空   | O(1)       |
 
 ### 比较函数
 
-| 函数 | 描述 | 时间复杂度 |
-|------|------|------------|
-| `Equal(a, b)` | 检查值是否相等 | O(1) |
-| `NotEqual(a, b)` | 检查值是否不相等 | O(1) |
-| `DeepEqual(a, b)` | 使用反射进行深度比较 | O(n) |
+| 函数              | 描述                 | 时间复杂度 |
+| ----------------- | -------------------- | ---------- |
+| `Equal(a, b)`     | 检查值是否相等       | O(1)       |
+| `NotEqual(a, b)`  | 检查值是否不相等     | O(1)       |
+| `DeepEqual(a, b)` | 使用反射进行深度比较 | O(n)       |
 
 ## 使用场景
 
@@ -430,15 +445,15 @@ func ValidateInput(data InputData) error {
     if is.Empty(data.Name) {
         return errors.New("姓名是必需的")
     }
-    
+
     if is.Zero(data.Age) || data.Age < 0 {
         return errors.New("年龄必须为正数")
     }
-    
+
     if is.Nil(data.Email) || is.Empty(*data.Email) {
         return errors.New("邮箱是必需的")
     }
-    
+
     return nil
 }
 ```
@@ -453,11 +468,11 @@ func CheckConfig(config Config) error {
     if is.Empty(config.Host) {
         return errors.New("主机不能为空")
     }
-    
+
     if is.Zero(config.Port) {
         return errors.New("必须指定端口")
     }
-    
+
     return nil
 }
 ```
@@ -469,12 +484,12 @@ import "github.com/go4x/goal/is"
 
 // 比较数据结构
 func CompareData(old, new Data) bool {
-    return is.DeepEqual(old, new)
+    return is.EqDeep(old, new)
 }
 
 // 检查值是否改变
 func HasChanged(old, new string) bool {
-    return is.NotEqual(old, new)
+    return is.Neq(old, new)
 }
 ```
 
@@ -488,12 +503,12 @@ func ProcessData(data string) error {
     if is.Empty(data) {
         return errors.New("数据为空")
     }
-    
+
     if is.NotEmpty(data) {
         // 处理非空数据
         return process(data)
     }
-    
+
     return nil
 }
 ```
@@ -501,4 +516,3 @@ func ProcessData(data string) error {
 ## 许可证
 
 此包是 goal 项目的一部分，遵循相同的许可证条款。
-

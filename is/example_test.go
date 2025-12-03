@@ -76,27 +76,57 @@ func ExampleEmpty() {
 	// false
 }
 
-// ExampleEqual demonstrates the Equal function
-func ExampleEqual() {
-	fmt.Println(is.Equal(42, 42))        // true
-	fmt.Println(is.Equal("hello", "hi")) // false
-	fmt.Println(is.Equal(0, 0))          // true
+// ExampleEq demonstrates the Eq function
+func ExampleEq() {
+	fmt.Println(is.Eq(42, 42))        // true
+	fmt.Println(is.Eq("hello", "hi")) // false
+	fmt.Println(is.Eq(0, 0))          // true
+
+	slice1 := []int{1, 2, 3}
+	slice2 := []int{1, 2, 3}
+	slice3 := []int{1, 2, 4}
+	fmt.Println(is.Eq(slice1, slice2)) // true
+	fmt.Println(is.Eq(slice1, slice3)) // false
+
+	map1 := map[string]int{"a": 1, "b": 2}
+	map2 := map[string]int{"a": 1, "b": 2}
+	map3 := map[string]int{"a": 1, "b": 3}
+	fmt.Println(is.Eq(map1, map2)) // true
+	fmt.Println(is.Eq(map1, map3)) // false
+
+	// Compare structs
+	type Person struct {
+		Name string
+		Age  int
+	}
+
+	p1 := Person{Name: "John", Age: 30}
+	p2 := Person{Name: "John", Age: 30}
+	p3 := Person{Name: "Jane", Age: 30}
+	fmt.Println(is.Eq(p1, p2)) // true
+	fmt.Println(is.Eq(p1, p3)) // false
+
+	type Func func() int
+	var v1 Func = nil
+	var v2 Func = nil
+	fmt.Println(is.Eq(v1, v2)) // true
+	f1 := func() int { return 1 }
+	f2 := f1
+	f3 := func() int { return 1 }
+	fmt.Println(is.Eq(f1, f2)) // false
+	fmt.Println(is.Eq(f1, f3)) // false
+
 	// Output:
 	// true
 	// false
 	// true
-}
-
-// ExampleDeepEqual demonstrates the DeepEqual function
-func ExampleDeepEqual() {
-	slice1 := []int{1, 2, 3}
-	slice2 := []int{1, 2, 3}
-	fmt.Println(is.DeepEqual(slice1, slice2)) // true
-
-	map1 := map[string]int{"a": 1}
-	map2 := map[string]int{"a": 1}
-	fmt.Println(is.DeepEqual(map1, map2)) // true
-	// Output:
 	// true
+	// false
 	// true
+	// false
+	// true
+	// false
+	// true
+	// false
+	// false
 }
