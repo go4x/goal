@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Simplified the root README into a short project entry point.
+- Moved broad project guidance toward workspace-level documentation.
+- Clarified that panic-based helpers should be treated as explicit `Must`/`Force`
+  style APIs.
+
 ## [1.0.0] - 2025-09-25
 
 ### Added
@@ -15,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **System & I/O**: cmd, iox, httpx for system operations
 - **Cryptography**: ciphers, uuid for security operations
 - **Error Handling**: errorx for comprehensive error management
-- **Mathematics**: mathx, prob, random for mathematical operations
+- **Mathematics**: prob, random for probability and random generation helpers
 - **Utilities**: timex, limiter, retry, reflectx, printer for various utilities
 - **Generic Type Support**: Modern Go generics throughout the codebase
 - **Performance Optimized**: O(1) operations for most collection operations

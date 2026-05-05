@@ -20,7 +20,7 @@ func TestBasicRetry(t *testing.T) {
 		return true, nil // Success
 	})
 
-	err := retry.Do(f, retry.Times(5))
+	err := retry.Do(f, retry.Times(5), retry.Interval(retry.ConstantInterval(0)))
 	if err != nil {
 		t.Errorf("Expected success, got error: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestRetryWithCallback(t *testing.T) {
 		t.Logf("Retry attempt %d failed: %v", n, err)
 	}
 
-	err := retry.Do(f, retry.Times(3), retry.Callback(callback))
+	err := retry.Do(f, retry.Times(3), retry.Interval(retry.ConstantInterval(0)), retry.Callback(callback))
 	if err != nil {
 		t.Errorf("Expected success, got error: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestRetryMaxAttemptsReached(t *testing.T) {
 		return false, errors.New("permanent error")
 	})
 
-	err := retry.Do(f, retry.Times(3))
+	err := retry.Do(f, retry.Times(3), retry.Interval(retry.ConstantInterval(0)))
 	if err == nil {
 		t.Error("Expected error, got nil")
 	}
@@ -201,8 +201,8 @@ func TestJitterIntervalNoJitter(t *testing.T) {
 	if attempts != 2 {
 		t.Errorf("Expected 2 attempts, got %d", attempts)
 	}
-	// Should be close to 50ms (base time) with minimal jitter
-	if elapsed < 50*time.Millisecond || elapsed > 60*time.Millisecond {
-		t.Errorf("Expected around 50ms elapsed, got %v", elapsed)
+	// The first retry sleeps for base * 2^1.
+	if elapsed < 100*time.Millisecond || elapsed > 150*time.Millisecond {
+		t.Errorf("Expected around 100ms elapsed, got %v", elapsed)
 	}
 }

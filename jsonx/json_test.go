@@ -36,7 +36,7 @@ func TestMarshal1(t *testing.T) {
 	var user = User{
 		Name:      "hank",
 		Age:       20,
-		BirthDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.Local),
+		BirthDate: time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC),
 		Other:     171.65,
 	}
 	json, err := jsonx.Marshal(user)

@@ -217,15 +217,10 @@ func TestToSliceFromSliceRoundTrip(t *testing.T) {
 }
 
 func TestNilptr(t *testing.T) {
-	// Test nil pointer behavior
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("Expected panic when calling From with nil ptr")
-		}
-	}()
-
 	var nilPtr *int
-	From(nilPtr) // 这应该会 panic
+	if got := From(nilPtr); got != 0 {
+		t.Errorf("From(nil) = %d, want zero value", got)
+	}
 }
 
 func TestNilSlice(t *testing.T) {
