@@ -1,10 +1,26 @@
 package envx
 
 import (
+	"os"
 	"reflect"
 	"testing"
 	"time"
 )
+
+func forceUnsetEnv(t *testing.T, key string) {
+	t.Helper()
+	old, had := os.LookupEnv(key)
+	if err := os.Unsetenv(key); err != nil {
+		t.Fatalf("Unsetenv(%q) failed: %v", key, err)
+	}
+	t.Cleanup(func() {
+		if had {
+			_ = os.Setenv(key, old)
+			return
+		}
+		_ = os.Unsetenv(key)
+	})
+}
 
 func TestGet(t *testing.T) {
 	t.Setenv("GOAL_ENVX_GET", "value")
@@ -16,6 +32,7 @@ func TestGet(t *testing.T) {
 
 func TestExists(t *testing.T) {
 	t.Setenv("GOAL_ENVX_EXISTS", "")
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
 
 	if !Exists("GOAL_ENVX_EXISTS") {
 		t.Fatal("Exists() = false, want true for empty but set variable")
@@ -27,6 +44,7 @@ func TestExists(t *testing.T) {
 
 func TestGetDefault(t *testing.T) {
 	t.Setenv("GOAL_ENVX_DEFAULT", "")
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
 
 	if got := GetDefault("GOAL_ENVX_DEFAULT", "fallback"); got != "" {
 		t.Fatalf("GetDefault() = %q, want empty string for set variable", got)
@@ -38,6 +56,7 @@ func TestGetDefault(t *testing.T) {
 
 func TestRequire(t *testing.T) {
 	t.Setenv("GOAL_ENVX_REQUIRE", "value")
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
 
 	got, err := Require("GOAL_ENVX_REQUIRE")
 	if err != nil {
@@ -55,6 +74,7 @@ func TestRequire(t *testing.T) {
 func TestGetInt(t *testing.T) {
 	t.Setenv("GOAL_ENVX_INT", "42")
 	t.Setenv("GOAL_ENVX_INT_BAD", "abc")
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
 
 	if got := GetInt("GOAL_ENVX_INT", 7); got != 42 {
 		t.Fatalf("GetInt() = %d, want 42", got)
@@ -70,7 +90,8 @@ func TestGetInt(t *testing.T) {
 func TestGetBool(t *testing.T) {
 	t.Setenv("GOAL_ENVX_BOOL", "true")
 	t.Setenv("GOAL_ENVX_BOOL_BAD", "maybe")
-
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
+	
 	if got := GetBool("GOAL_ENVX_BOOL", false); !got {
 		t.Fatal("GetBool() = false, want true")
 	}
@@ -85,6 +106,7 @@ func TestGetBool(t *testing.T) {
 func TestGetDuration(t *testing.T) {
 	t.Setenv("GOAL_ENVX_DURATION", "150ms")
 	t.Setenv("GOAL_ENVX_DURATION_BAD", "soon")
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
 
 	if got := GetDuration("GOAL_ENVX_DURATION", time.Second); got != 150*time.Millisecond {
 		t.Fatalf("GetDuration() = %v, want 150ms", got)
@@ -100,7 +122,8 @@ func TestGetDuration(t *testing.T) {
 func TestGetSlice(t *testing.T) {
 	t.Setenv("GOAL_ENVX_SLICE", "api, worker, , scheduler")
 	t.Setenv("GOAL_ENVX_SLICE_SEMICOLON", "a;b;c")
-
+	forceUnsetEnv(t, "GOAL_ENVX_MISSING")
+	
 	tests := []struct {
 		name     string
 		key      string
