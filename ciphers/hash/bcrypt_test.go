@@ -213,30 +213,16 @@ func TestBCrypt(t *testing.T) {
 			}
 		})
 
-		// Test to try to trigger the error path in BCrypt by using extreme cost
-		t.Run("BCrypt extreme cost attempt", func(t *testing.T) {
-			// Try with a very high cost that might cause bcrypt to fail
-			// This is a long shot, but worth trying
-			testString := "test"
-			hash, err := BCryptWithCost(testString, 31) // Maximum valid cost
-			if err != nil {
-				// This might actually trigger the error path we want to test
-				t.Logf("BCryptWithCost with cost 31 failed as expected: %v", err)
-			} else {
-				t.Logf("BCryptWithCost with cost 31 succeeded: %s", hash[:20]+"...")
-			}
-		})
-
 		// Test to try to trigger the error path in BCrypt by using invalid cost
 		t.Run("BCrypt invalid cost attempt", func(t *testing.T) {
 			// Try with an invalid cost that should cause bcrypt to fail
 			testString := "test"
-			hash, err := BCryptWithCost(testString, -1) // Invalid cost
+			hash, err := BCryptWithCost(testString, 32) // Invalid cost
 			if err != nil {
 				// This should trigger the error path we want to test
-				t.Logf("BCryptWithCost with cost -1 failed as expected: %v", err)
+				t.Logf("BCryptWithCost with cost 32 failed as expected: %v", err)
 			} else {
-				t.Errorf("BCryptWithCost with cost -1 should have failed, got: %s", hash[:20]+"...")
+				t.Errorf("BCryptWithCost with cost 32 should have failed, got: %s", hash[:20]+"...")
 			}
 		})
 

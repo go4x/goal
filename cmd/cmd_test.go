@@ -94,9 +94,9 @@ func TestExec_Error(t *testing.T) {
 			errorMsg: "exit status 2",
 		},
 		{
-			name:     "ls non-existent directory",
-			shell:    "ls",
-			args:     []string{"/nonexistent/directory/12345"},
+			name:     "command writes stderr and exits 1",
+			shell:    "bash",
+			args:     []string{"-c", "echo missing path >&2; exit 1"},
 			wantErr:  true,
 			errorMsg: "exit status 1",
 		},
@@ -116,8 +116,8 @@ func TestExec_Error(t *testing.T) {
 				}
 				// 验证即使出错也返回了输出（如果有的话）
 				// 注意：exit命令不会产生输出，所以这里不检查空输出
-				if tt.name == "ls non-existent directory" && output == "" {
-					t.Errorf("Exec() should return error output for ls command, got empty output")
+				if tt.name == "command writes stderr and exits 1" && !strings.Contains(output, "missing path") {
+					t.Errorf("Exec() should return stderr output, got %q", output)
 				}
 			}
 		})

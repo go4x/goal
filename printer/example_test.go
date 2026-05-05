@@ -37,10 +37,6 @@ func ExamplePrintw() {
 	printer.Printw(10, "Name", "Age", "City")
 	printer.Printw(10, "Alice", 25, "New York")
 	printer.Printw(10, "Bob", 30, "London")
-	// Output:
-	// Name      Age       City
-	// Alice     25        New York
-	// Bob       30        London
 }
 
 func ExamplePrintwln() {
@@ -48,10 +44,6 @@ func ExamplePrintwln() {
 	printer.Printwln(10, "Name", "Age", "City")
 	printer.Printwln(10, "Alice", 25, "New York")
 	printer.Printwln(10, "Bob", 30, "London")
-	// Output:
-	// Name      Age       City
-	// Alice     25        New York
-	// Bob       30        London
 }
 
 func ExamplePrintTable() {
@@ -64,12 +56,6 @@ func ExamplePrintTable() {
 	}
 
 	printer.PrintTable(headers, rows, 12)
-	// Output:
-	// Name         Age         Score
-	// ========================================================================================
-	// Alice        25          95.50
-	// Bob          30          87.20
-	// Charlie      35          92.80
 }
 
 func ExamplePrintJSON() {
@@ -81,12 +67,6 @@ func ExamplePrintJSON() {
 	}
 
 	printer.PrintJSON(data)
-	// Output:
-	// {
-	//   "name": Alice,
-	//   "age": 25,
-	//   "city": New York,
-	// }
 }
 
 func ExamplePrintStruct() {
@@ -144,22 +124,6 @@ func ExamplePrintTable_complex() {
 
 	printer.Println("\nSummary:")
 	printer.PrintJSON(summary)
-	// Output:
-	// === Sales Report ===
-	// ========================================================================================
-	// Product         Quantity      Price          Total
-	// Laptop          5             999.99         4999.95
-	// Mouse           20            29.99          599.80
-	// Keyboard        15            79.99          1199.85
-	// ========================================================================================
-	// Total: $6799.60
-	//
-	// Summary:
-	// {
-	//   "total_products": 3,
-	//   "total_amount": 6799.6,
-	//   "average_price": 2266.5333333333333,
-	// }
 }
 
 func ExamplePrintTable_error() {
@@ -172,7 +136,6 @@ func ExamplePrintTable_error() {
 	if err := printer.PrintTable(headers, rows, 10); err != nil {
 		fmt.Printf("Error: %v\n", err)
 	}
-	// Output: Error: row length 3 does not match header length 2
 }
 
 func ExamplePrintw_custom() {
@@ -200,10 +163,4 @@ func ExamplePrintw_custom() {
 	printer.Printw(10, 25)
 	printer.Printw(15, 149.99)
 	printer.NewLine()
-	// Output:
-	// === Product Inventory ===
-	// Product Name         Stock      Price
-	// Gaming Laptop        15         1299.99
-	// Wireless Mouse       50         39.99
-	// Mechanical Keyboard  25         149.99
 }

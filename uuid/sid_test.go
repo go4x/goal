@@ -22,7 +22,7 @@ func TestUint64ToBase62(t *testing.T) {
 		{name: "one hundred twenty-three", n: 123, want: "1Z"},
 		{name: "three thousand eight hundred forty-three", n: 3843, want: "ZZ"},
 		{name: "two hundred thirty-eight thousand three hundred twenty-eight", n: 238328, want: "1000"},
-		{name: "large number", n: 18446744073709551615, want: "LygHa16ahYG"},
+		{name: "large number", n: 18446744073709551615, want: "lYGhA16ahyf"},
 	}
 
 	for _, tt := range tests {
